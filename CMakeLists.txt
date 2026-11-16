@@ -4,6 +4,7 @@ project(RPG)
 set(CMAKE_CXX_STANDARD 26)
 
 set(BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+set(PLATFORM SDL CACHE STRING "raylib backend" FORCE) # for joystick vibration
 add_subdirectory(raylib)
 
 add_executable(RPG main.cpp)

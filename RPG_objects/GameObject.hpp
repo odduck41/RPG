@@ -1,11 +1,14 @@
 #pragma once
 #include <string>
 #include "raylib.h"
+#include "Texture.hpp"
 
-class GameObject {
-public:
-    GameObject(std::string filename)
-        : texture_(LoadTextureFromImage(LoadImage(std::move(filename).c_str()))) {}
-private:
-    Texture2D texture_;
-};
+namespace RPG {
+    class GameObject {
+    public:
+        GameObject() = default;
+        void setTexture(std::string filename);
+    private:
+        RPGTexture* texture_{};
+    };
+}
