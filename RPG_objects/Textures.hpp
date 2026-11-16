@@ -38,9 +38,10 @@ namespace RPG {
             std::ranges::for_each(textures_, UnloadTexture);
         };
     private:
-        int state_{};
-        std::size_t frameSeed_{};
+        int states_[4]{};
+        std::size_t frameSeed_[4]{};
         Texture2D textures_[4]{};
         Rectangle rectangles_[4]{};
+
     };
 }
