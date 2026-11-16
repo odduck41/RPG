@@ -15,7 +15,7 @@ int main() {
     obj->setTexture<RPG::Running>("../raylib/examples/textures/resources/scarfy.png", 6);
     obj->setPosition({350.0f, 280.f});
     obj->setAnimationType(RPG::Running);
-    obj->setFrameSpeed(8);
+    obj->setFrameSpeed(60. / 8.);
     SetTargetFPS(60);
 
     int framesCounter = 0;

@@ -80,17 +80,17 @@ namespace RPG {
         }
 
         template<AnimationTypes type>
-        void setFrameSpeed(const std::size_t& speed) {
+        void setFrameSpeed(const double& speed) {
             // Frame changes every 1 / speed [secs]
             frameSeed_[type] = speed;
         }
 
-        void setFrameSpeed(const std::size_t& speed) {
+        void setFrameSpeed(const double& speed) {
             // Frame changes every 1 / speed [secs]
             frameSeed_[type_] = speed;
         }
 
-        [[nodiscard]] const std::size_t& getFrameSpeed() const {
+        [[nodiscard]] const double& getFrameSpeed() const {
             return frameSeed_[type_];
         }
 
@@ -129,7 +129,7 @@ namespace RPG {
         AnimationTypes type_{};
         int states_[6]{};
         int state_{};
-        std::size_t frameSeed_[6]{}; // frameCounter[Frames] * frameSpeed[1/s] >= 60[FPS]
+        double frameSeed_[6]{}; // frameCounter[Frames] * frameSpeed[1/s] >= 60[FPS]
         Texture2D textures_[6]{};
         Rectangle source_rectangles_[6]{};
 
