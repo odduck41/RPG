@@ -81,10 +81,12 @@ namespace RPG {
 
         template<AnimationTypes type>
         void setFrameSpeed(const std::size_t& speed) {
+            // Frame changes every 1 / speed [secs]
             frameSeed_[type] = speed;
         }
 
         void setFrameSpeed(const std::size_t& speed) {
+            // Frame changes every 1 / speed [secs]
             frameSeed_[type_] = speed;
         }
 
