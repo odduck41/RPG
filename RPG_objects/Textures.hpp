@@ -31,10 +31,12 @@ namespace RPG {
     };
 
     enum AnimationTypes {
-        Still = 0,
-        Attack = 1,
-        Eating = 2,
-        Fishing = 3
+        Still,
+        Going,
+        Running,
+        Attack,
+        Eating,
+        Fishing
     };
 
     class AnimatableTexture : public RPGTexture {
@@ -61,8 +63,8 @@ namespace RPG {
 
             source_rectangles_[type] = {
                 .x = 0.f, .y = 0.f,
-                .width = static_cast<float>(textures_[type_].width) / static_cast<float>(states),
-                .height = static_cast<float>(textures_[type_].height)
+                .width = static_cast<float>(textures_[type].width) / static_cast<float>(states),
+                .height = static_cast<float>(textures_[type].height)
             };
         }
 
@@ -115,7 +117,7 @@ namespace RPG {
             };
 
             DrawTexturePro(textures_[type_], source_rectangles_[type_], dest_rect,
-                            Vector2{0, 0}, rotation_, WHITE);
+                            Vector2{.x = 0, .y = 0}, rotation_, WHITE);
         }
 
         ~AnimatableTexture() override {
@@ -123,11 +125,11 @@ namespace RPG {
         };
     private:
         AnimationTypes type_{};
-        int states_[4]{};
+        int states_[6]{};
         int state_{};
-        std::size_t frameSeed_[4]{};
-        Texture2D textures_[4]{};
-        Rectangle source_rectangles_[4]{};
+        std::size_t frameSeed_[6]{}; // frameCounter[Frames] * frameSpeed[1/s] >= 60[FPS]
+        Texture2D textures_[6]{};
+        Rectangle source_rectangles_[6]{};
 
     };
 }

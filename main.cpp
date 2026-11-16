@@ -12,8 +12,9 @@ int main() {
 
     RPG::RPGTexture* object = new RPG::AnimatableTexture;
     const auto obj = reinterpret_cast<RPG::AnimatableTexture*>(object);
+    obj->setTexture<RPG::Running>("../raylib/examples/textures/resources/scarfy.png", 6);
     obj->setPosition({350.0f, 280.f});
-    obj->setTexture("../raylib/examples/textures/resources/scarfy.png", 6);
+    obj->setAnimationType(RPG::Running);
     obj->setFrameSpeed(8);
     SetTargetFPS(60);
 
