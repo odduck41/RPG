@@ -20,14 +20,28 @@ namespace RPG {
             return position_;
         }
 
+        void setScaling(const double& scaling) {
+            scaling_ = scaling;
+        }
+        [[nodiscard]] const double& getScaling() const {
+            return scaling_;
+        }
+
+        void setRotation(const double& rotation) {
+            rotation_ = rotation;
+        }
+        [[nodiscard]] const double& getRotation() const {
+            return rotation_;
+        }
+
         virtual void update() = 0;
         virtual void draw() = 0;
         virtual ~RPGTexture() = default;
     protected:
         bool visible_{true};
         Vector2 position_{};
-        float scaling_{1};
-        float rotation_{0};
+        double scaling_{1};
+        double rotation_{0};
     };
 
     enum AnimationTypes {
