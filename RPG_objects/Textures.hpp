@@ -100,20 +100,18 @@ namespace RPG {
         void update() override {
             ++state_; state_ %= states_[type_];
 
-            // assert(textures_[type_].width % states_[type_] == 0);
-
             source_rectangles_[type_].x =
-                static_cast<float>(textures_[type_].width)
+                static_cast<float>(textures_[type_].width * state_)
                         /
-                static_cast<float>(states_[type_] * state_);
+                static_cast<float>(states_[type_]);
         }
 
         void draw() override {
             if (!visible_) return;
             const Rectangle dest_rect = {
-                position_.x, position_.y,
-                static_cast<float>(textures_[type_].width) / static_cast<float>(states_[type_]),
-                static_cast<float>(textures_[type_].height)
+                .x = position_.x, .y = position_.y,
+                .width = static_cast<float>(textures_[type_].width) / static_cast<float>(states_[type_]),
+                .height = static_cast<float>(textures_[type_].height)
             };
 
             DrawTexturePro(textures_[type_], source_rectangles_[type_], dest_rect,
