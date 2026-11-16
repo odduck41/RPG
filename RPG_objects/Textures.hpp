@@ -1,5 +1,6 @@
 #pragma once
 #include <algorithm>
+// #include <cassert>
 #include <string>
 
 #include "raylib.h"
@@ -8,13 +9,25 @@ namespace RPG {
     class RPGTexture {
     public:
         RPGTexture() = default;
-        void show() {visible = true;}
-        void hide() {visible = false;}
+        explicit RPGTexture(const Vector2& pos) : position_(pos) {}
+        void show() {visible_ = true;}
+        void hide() {visible_ = false;}
+
+        void setPosition(const Vector2& pos) {
+            position_ = pos;
+        }
+        [[nodiscard]] const Vector2& getPosition() const {
+            return position_;
+        }
 
         virtual void update() = 0;
+        virtual void draw() = 0;
         virtual ~RPGTexture() = default;
-    private:
-        bool visible{true};
+    protected:
+        bool visible_{true};
+        Vector2 position_{};
+        float scaling_{1};
+        float rotation_{0};
     };
 
     enum AnimationTypes {
@@ -29,14 +42,39 @@ namespace RPG {
         AnimatableTexture() = default;
 
         template<AnimationTypes type>
-        void setTexture(std::string filename, const Rectangle& rect) {
+        void setTexture(const std::string& filename, const Rectangle& rect) {
             textures_[type] = LoadTexture(std::move(filename).c_str());
-            rectangles_[type] = rect;
+            source_rectangles_[type] = rect;
+            states_[type] = textures_[type].width / static_cast<int>(rect.width);
         }
 
-        void setTexture(std::string filename, const Rectangle& rect) {
+        void setTexture(const std::string& filename, const Rectangle& rect) {
             textures_[type_] = LoadTexture(std::move(filename).c_str());
-            rectangles_[type_] = rect;
+            source_rectangles_[type_] = rect;
+            states_[type_] = textures_[type_].width / static_cast<int>(rect.width);
+        }
+
+        template<AnimationTypes type>
+        void setTexture(const std::string& filename, const int& states) {
+            textures_[type] = LoadTexture(std::move(filename).c_str());
+            states_[type] = states;
+
+            source_rectangles_[type] = {
+                .x = 0.f, .y = 0.f,
+                .width = static_cast<float>(textures_[type_].width) / static_cast<float>(states),
+                .height = static_cast<float>(textures_[type_].height)
+            };
+        }
+
+        void setTexture(const std::string& filename, const int& states) {
+            textures_[type_] = LoadTexture(std::move(filename).c_str());
+            states_[type_] = states;
+
+            source_rectangles_[type_] = {
+                .x = 0.f, .y = 0.f,
+                .width = static_cast<float>(textures_[type_].width) / static_cast<float>(states),
+                .height = static_cast<float>(textures_[type_].height)
+            };
         }
 
         template<AnimationTypes type>
@@ -48,23 +86,41 @@ namespace RPG {
             frameSeed_[type_] = speed;
         }
 
-        std::size_t getFrameSpeed() const {
+        [[nodiscard]] const std::size_t& getFrameSpeed() const {
             return frameSeed_[type_];
         }
 
         void setAnimationType(const AnimationTypes& type) {
             type_ = type;
         }
-        [[nodiscard]] AnimationTypes getAnimationType() const {
+        [[nodiscard]] const AnimationTypes& getAnimationType() const {
             return type_;
         }
 
-        virtual void update() override {
+        void update() override {
             ++state_; state_ %= states_[type_];
-            rectangles_[type_].x = state_ * textures_[type_].width / states_[type_];
+
+            // assert(textures_[type_].width % states_[type_] == 0);
+
+            source_rectangles_[type_].x =
+                static_cast<float>(textures_[type_].width)
+                        /
+                static_cast<float>(states_[type_] * state_);
         }
 
-        virtual ~AnimatableTexture() override {
+        void draw() override {
+            if (!visible_) return;
+            const Rectangle dest_rect = {
+                position_.x, position_.y,
+                static_cast<float>(textures_[type_].width) / static_cast<float>(states_[type_]),
+                static_cast<float>(textures_[type_].height)
+            };
+
+            DrawTexturePro(textures_[type_], source_rectangles_[type_], dest_rect,
+                            Vector2{0, 0}, rotation_, WHITE);
+        }
+
+        ~AnimatableTexture() override {
             std::ranges::for_each(textures_, UnloadTexture);
         };
     private:
@@ -73,6 +129,7 @@ namespace RPG {
         int state_{};
         std::size_t frameSeed_[4]{};
         Texture2D textures_[4]{};
-        Rectangle rectangles_[4]{};
+        Rectangle source_rectangles_[4]{};
+
     };
 }
