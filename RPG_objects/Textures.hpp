@@ -145,12 +145,12 @@ namespace RPG {
             if (!visible_) return;
             const Rectangle dest_rect = {
                 .x = position_.x, .y = position_.y,
-                .width = static_cast<float>(textures_[type_].width) / static_cast<float>(states_[type_]),
-                .height = static_cast<float>(textures_[type_].height)
+                .width = static_cast<float>(textures_[type_].width * scaling_) / static_cast<float>(states_[type_]),
+                .height = static_cast<float>(textures_[type_].height * scaling_)
             };
 
             DrawTexturePro(textures_[type_], source_rectangles_[type_], dest_rect,
-                            Vector2{.x = 0, .y = 0}, rotation_, WHITE);
+                            Vector2{.x = 0, .y = 0}, static_cast<float>(rotation_), WHITE);
         }
 
         ~AnimatableTexture() override {
