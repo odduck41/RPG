@@ -11,9 +11,10 @@ int main() {
     InitWindow(screenWidth, screenHeight, "Sprite animation");
 
     RPG::RPGTexture* object =
-        new RPG::AnimatableTexture("../raylib/examples/textures/resources/scarfy.png", 6, RPG::Running);
-    object->setPosition({.x = 350.0f, .y = 280.f});
-    object->setFrameSpeed(8.); // Frame updates every 1/8 second
+        new RPG::AnimatableTexture("../Solder-Walk.png", 8, RPG::Walking);
+    object->setPosition({.x = 150.0f, .y = 80.f});
+    object->setFrameSpeed(1.);
+    object->setScaling(4);
     SetTargetFPS(60);
 
     int framesCounter = 0;
