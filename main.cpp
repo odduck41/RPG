@@ -12,11 +12,12 @@ int main() {
 
     RPG::RPGTexture* object =
         new RPG::AnimatableTexture(
-            "../assets/Solder-Walk.png",  8, RPG::Idle
+            "../assets/Orc.png",  Rectangle{0., 0., 100., 100.}, 6, RPG::Idle
             );
 
     object->setPosition({.x = .0f, .y = 0.f});
-    object->setFrameSpeed(12.);
+    reinterpret_cast<RPG::AnimatableTexture*>(object)->setFrameSpeed(12.);
+    // reinterpret_cast<RPG::AnimatableTexture*>(object)
     object->setScaling(2);
     SetTargetFPS(60);
 

@@ -12,6 +12,8 @@ namespace RPG {
         Walking,
         Running,
         Attack,
+        Damaged,
+        Dying,
         Eating,
         Fishing
     };
@@ -202,6 +204,7 @@ namespace RPG {
                 .height = static_cast<float>(source_rectangles_[type_].height * scaling_)
             };
 
+            // DrawRectangleRec(dest_rect, GREEN);
             DrawTexturePro(textures_[type_], source_rectangles_[type_], dest_rect,
                             Vector2{.x = 0, .y = 0}, static_cast<float>(rotation_), WHITE);
             ++frameCounter_;
@@ -212,12 +215,12 @@ namespace RPG {
         };
     private:
         AnimationTypes type_{};
-        int stateAmounts_[6]{};
+        int stateAmounts_[8]{};
         int actualState_{};
-        double frameSpeed_[6]{}; // frameCounter[Frames] * frameSpeed[1/s] >= 60[FPS]
+        double frameSpeed_[8]{}; // frameCounter[Frames] * frameSpeed[1/s] >= 60[FPS]
         int frameCounter_{0};
-        Texture2D textures_[6]{};
-        Rectangle source_rectangles_[6]{};
+        Texture2D textures_[8]{};
+        Rectangle source_rectangles_[8]{};
 
     };
 }
