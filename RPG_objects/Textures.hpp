@@ -1,7 +1,6 @@
 #pragma once
 #include <algorithm>
-// #include <cassert>
-#include <assert.h>
+#include <cassert>
 #include <string>
 
 #include "raylib.h"
