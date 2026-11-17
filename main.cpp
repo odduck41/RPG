@@ -11,10 +11,14 @@ int main() {
     InitWindow(screenWidth, screenHeight, "Sprite animation");
 
     RPG::RPGTexture* object =
-        new RPG::AnimatableTexture("../assets/Solder-Walk.png", 8, RPG::Walking);
-    object->setPosition({.x = 150.0f, .y = 80.f});
+        new RPG::AnimatableTexture(
+            "../assets/Orc.png",
+            Rectangle{0., 0., 100., 100.}, 6, RPG::Idle
+            );
+
+    object->setPosition({.x = .0f, .y = 0.f});
     object->setFrameSpeed(12.);
-    object->setScaling(4);
+    object->setScaling(2);
     SetTargetFPS(60);
 
 

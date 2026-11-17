@@ -69,9 +69,13 @@ namespace RPG {
     public:
         AnimatableTexture() = default;
 
-        AnimatableTexture(const std::string& filename, const Rectangle& rect, const AnimationTypes type = Idle) {
+        AnimatableTexture(const std::string& filename, const Rectangle& rect, int states = 0, const AnimationTypes type = Idle) {
             setAnimationType(type);
             setTexture(filename, rect);
+            if (states == 0) {
+                states = textures_[type].width / static_cast<int>(rect.width);
+            }
+            states_[type] = states;
         }
 
         AnimatableTexture(const std::string& filename, const int& states, const AnimationTypes type = Idle) {
@@ -143,17 +147,15 @@ namespace RPG {
             ++state_; state_ %= states_[type_];
 
             source_rectangles_[type_].x =
-                static_cast<float>(textures_[type_].width * state_)
-                        /
-                static_cast<float>(states_[type_]);
+                static_cast<float>(state_) * source_rectangles_[type_].width;
         }
 
         void draw() override {
             if (!visible_) return;
             const Rectangle dest_rect = {
                 .x = position_.x, .y = position_.y,
-                .width = static_cast<float>(textures_[type_].width * scaling_) / static_cast<float>(states_[type_]),
-                .height = static_cast<float>(textures_[type_].height * scaling_)
+                .width = static_cast<float>(source_rectangles_[type_].width * scaling_),
+                .height = static_cast<float>(source_rectangles_[type_].height * scaling_)
             };
 
             DrawTexturePro(textures_[type_], source_rectangles_[type_], dest_rect,
