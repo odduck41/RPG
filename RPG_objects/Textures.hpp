@@ -47,12 +47,6 @@ namespace RPG {
         }
 
 
-        virtual void setFrameSpeed(const double& speed) = 0;
-
-         [[nodiscard]] virtual double getFrameSpeed() const {
-            return 1.;
-        }
-
         virtual void update() = 0;
         virtual void draw() = 0;
         virtual ~RPGTexture() = default;
@@ -75,7 +69,7 @@ namespace RPG {
             if (states == 0) {
                 states = textures_[type].width / static_cast<int>(rect.width);
             }
-            states_[type] = states;
+            stateAmounts_[type] = states;
         }
 
         AnimatableTexture(const std::string& filename, const Rectangle& rect, const AnimationTypes type = Idle, int states = 0) {
@@ -84,7 +78,7 @@ namespace RPG {
             if (states == 0) {
                 states = textures_[type].width / static_cast<int>(rect.width);
             }
-            states_[type] = states;
+            stateAmounts_[type] = states;
         }
 
         AnimatableTexture(const std::string& filename, const int& states, const AnimationTypes type = Idle) {
@@ -92,23 +86,26 @@ namespace RPG {
             setTexture(filename, states);
         }
 
+
+
+
         template<AnimationTypes type>
         void setTexture(const std::string& filename, const Rectangle& rect) {
             textures_[type] = LoadTexture(std::move(filename).c_str());
             source_rectangles_[type] = rect;
-            states_[type] = textures_[type].width / static_cast<int>(rect.width);
+            stateAmounts_[type] = textures_[type].width / static_cast<int>(rect.width);
         }
 
         void setTexture(const std::string& filename, const Rectangle& rect) {
             textures_[type_] = LoadTexture(std::move(filename).c_str());
             source_rectangles_[type_] = rect;
-            states_[type_] = textures_[type_].width / static_cast<int>(rect.width);
+            stateAmounts_[type_] = textures_[type_].width / static_cast<int>(rect.width);
         }
 
         template<AnimationTypes type>
         void setTexture(const std::string& filename, const int& states) {
             textures_[type] = LoadTexture(std::move(filename).c_str());
-            states_[type] = states;
+            stateAmounts_[type] = states;
 
             assert(textures_[type].width % states == 0 && "MISMATCHING TEXTURE SIZE");
 
@@ -121,7 +118,7 @@ namespace RPG {
 
         void setTexture(const std::string& filename, const int& states) {
             textures_[type_] = LoadTexture(std::move(filename).c_str());
-            states_[type_] = states;
+            stateAmounts_[type_] = states;
 
             assert(textures_[type_].width % states == 0 && "MISMATCHING TEXTURE SIZE");
 
@@ -132,35 +129,69 @@ namespace RPG {
             };
         }
 
+
+
+
         template<AnimationTypes type>
         void setFrameSpeed(const double& speed) {
             // Frame changes every 1 / speed [secs]
-            frameSeed_[type] = speed;
+            frameSpeed_[type] = speed;
         }
 
-        void setFrameSpeed(const double& speed) final {
+        void setFrameSpeed(const double& speed) {
             // Frame changes every 1 / speed [secs]
-            frameSeed_[type_] = speed;
+            frameSpeed_[type_] = speed;
         }
 
-        [[nodiscard]] double getFrameSpeed() const final {
-            return frameSeed_[type_];
+        template<AnimationTypes type>
+        [[nodiscard]] double getFrameSpeed() const {
+            return frameSpeed_[type];
         }
+
+        [[nodiscard]] double getFrameSpeed() const {
+            return frameSpeed_[type_];
+        }
+
+
+
 
         void setAnimationType(const AnimationTypes& type) {
             type_ = type;
         }
+
         [[nodiscard]] const AnimationTypes& getAnimationType() const {
             return type_;
         }
 
+
+
+
+        template<AnimationTypes type>
+        void setStatesAmount(const int& amount) {
+            stateAmounts_[type] = amount;
+        }
+
+        void setStatesAmount(const int& amount) {
+            stateAmounts_[type_] = amount;
+        }
+
+        template<AnimationTypes type>
+        [[nodiscard]] int getStatesAmount() const {
+            return stateAmounts_[type];
+        }
+
+        [[nodiscard]] int getStatesAmount() const {
+            return stateAmounts_[type_];
+        }
+
+
         void update() override {
-            if (frameCounter_ * frameSeed_[type_] < 60) return;
+            if (frameCounter_ * frameSpeed_[type_] < 60) return;
             frameCounter_ = 0;
-            ++state_; state_ %= states_[type_];
+            ++actualState_; actualState_ %= stateAmounts_[type_];
 
             source_rectangles_[type_].x =
-                static_cast<float>(state_) * source_rectangles_[type_].width;
+                static_cast<float>(actualState_) * source_rectangles_[type_].width;
         }
 
         void draw() override {
@@ -181,9 +212,9 @@ namespace RPG {
         };
     private:
         AnimationTypes type_{};
-        int states_[6]{};
-        int state_{};
-        double frameSeed_[6]{}; // frameCounter[Frames] * frameSpeed[1/s] >= 60[FPS]
+        int stateAmounts_[6]{};
+        int actualState_{};
+        double frameSpeed_[6]{}; // frameCounter[Frames] * frameSpeed[1/s] >= 60[FPS]
         int frameCounter_{0};
         Texture2D textures_[6]{};
         Rectangle source_rectangles_[6]{};
