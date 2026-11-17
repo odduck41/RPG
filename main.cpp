@@ -11,20 +11,16 @@ int main() {
     InitWindow(screenWidth, screenHeight, "Sprite animation");
 
     RPG::RPGTexture* object =
-        new RPG::AnimatableTexture("../Solder-Walk.png", 8, RPG::Walking);
+        new RPG::AnimatableTexture("../assets/Solder-Walk.png", 8, RPG::Walking);
     object->setPosition({.x = 150.0f, .y = 80.f});
     object->setFrameSpeed(12.);
     object->setScaling(4);
     SetTargetFPS(60);
 
-    int framesCounter = 0;
 
     while (!WindowShouldClose()) {
-        ++framesCounter;
-        if (framesCounter * object->getFrameSpeed() >= 60) {
-            framesCounter = 0;
-            object->update();
-        }
+
+        object->update();
 
         BeginDrawing();
 

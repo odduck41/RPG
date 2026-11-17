@@ -138,6 +138,8 @@ namespace RPG {
         }
 
         void update() override {
+            if (frameCounter_ * frameSeed_[type_] < 60) return;
+            frameCounter_ = 0;
             ++state_; state_ %= states_[type_];
 
             source_rectangles_[type_].x =
@@ -156,6 +158,7 @@ namespace RPG {
 
             DrawTexturePro(textures_[type_], source_rectangles_[type_], dest_rect,
                             Vector2{.x = 0, .y = 0}, static_cast<float>(rotation_), WHITE);
+            ++frameCounter_;
         }
 
         ~AnimatableTexture() override {
@@ -166,6 +169,7 @@ namespace RPG {
         int states_[6]{};
         int state_{};
         double frameSeed_[6]{}; // frameCounter[Frames] * frameSpeed[1/s] >= 60[FPS]
+        int frameCounter_{0};
         Texture2D textures_[6]{};
         Rectangle source_rectangles_[6]{};
 
