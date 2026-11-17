@@ -1,6 +1,7 @@
 #pragma once
 #include <algorithm>
 #include <cassert>
+#include <functional>
 #include <string>
 
 #include "raylib.h"
@@ -171,8 +172,33 @@ namespace RPG {
 
 
 
-        void setAnimationType(const AnimationTypes& type) {
+        void setAnimationTypeSmooth(const AnimationTypes& type) {
+            if (dropping_) {
+                asked_ = type_ = type;
+                droppingAsked_ = dropping_ = false;
+                return;
+            }
             asked_ = type;
+            droppingAsked_ = false;
+        }
+
+        void setAnimationType(const AnimationTypes& type) {
+            asked_ = type_ = type;
+            droppingAsked_ = dropping_ = false;
+        }
+
+        void setAnimationTypeDropping(const AnimationTypes& type) {
+            asked_ = type_ = type;
+            droppingAsked_ = dropping_ = true;
+        }
+
+        void setAnimationTypeSmoothDropping(const AnimationTypes& type) {
+            if (dropping_) {
+                asked_ = type_ = type;
+                droppingAsked_ = true;
+            }
+            asked_ = type;
+            droppingAsked_ = true;
         }
 
         [[nodiscard]] const AnimationTypes& getAnimationType() const {
@@ -201,12 +227,36 @@ namespace RPG {
         }
 
 
+
+        template<AnimationTypes type>
+        void setBeforeAnimation(const std::function<void()>& func) {
+            functionsBefore_[type] = func;
+        }
+
+        void setBeforeAnimation(const std::function<void()>& func) {
+            functionsBefore_[type_] = func;
+        }
+
+        template<AnimationTypes type>
+        void setAfterAnimation(const std::function<void()>& func) {
+            functionsAfter_[type] = func;
+        }
+
+        void setAfterAnimation(const std::function<void()>& func) {
+            functionsAfter_[type_] = func;
+        }
+
+
+
         void update() override {
-            if (frameSpeed_[type_] == 0) frameSpeed_[type_] = (1. + 1./3.) * stateAmounts_[type_];
+            if (frameSpeed_[type_] == 0) frameSpeed_[type_] = 1.5 * stateAmounts_[type_];
             if (frameCounter_ * frameSpeed_[type_] < 60) return;
             frameCounter_ = 0;
             ++actualState_; actualState_ %= stateAmounts_[type_];
-            if (actualState_ == 0) type_ = asked_;
+            if (actualState_ == 0) {
+                type_ = asked_;
+                dropping_ = asked_;
+            }
 
             source_rectangles_[type_].x =
                 static_cast<float>(actualState_) * source_rectangles_[type_].width;
@@ -221,8 +271,13 @@ namespace RPG {
             };
 
             // DrawRectangleRec(dest_rect, GREEN);
+
+
+            if (functionsBefore_[type_] != nullptr) functionsBefore_[type_]();
             DrawTexturePro(textures_[type_], source_rectangles_[type_], dest_rect,
                             Vector2{.x = 0, .y = 0}, static_cast<float>(rotation_), WHITE);
+            if (functionsAfter_[type_] != nullptr) functionsAfter_[type_]();
+
             ++frameCounter_;
         }
 
@@ -238,6 +293,9 @@ namespace RPG {
         int frameCounter_{0};
         Texture2D textures_[8]{};
         Rectangle source_rectangles_[8]{};
-
+        std::function<void()> functionsBefore_[8]{};
+        std::function<void()> functionsAfter_[8]{};
+        bool dropping_{};
+        bool droppingAsked_{};
     };
 }
