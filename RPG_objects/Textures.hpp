@@ -69,12 +69,12 @@ namespace RPG {
     public:
         AnimatableTexture() = default;
 
-        AnimatableTexture(const std::string& filename, const Rectangle& rect, const AnimationTypes type = Still) {
+        AnimatableTexture(const std::string& filename, const Rectangle& rect, const AnimationTypes type = Idle) {
             setAnimationType(type);
             setTexture(filename, rect);
         }
 
-        AnimatableTexture(const std::string& filename, const int& states, const AnimationTypes type = Still) {
+        AnimatableTexture(const std::string& filename, const int& states, const AnimationTypes type = Idle) {
             setAnimationType(type);
             setTexture(filename, states);
         }
