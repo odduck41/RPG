@@ -46,22 +46,43 @@ int main() {
                 reinterpret_cast<RPG::AnimatableTexture*>(object)->getAnimationType() == RPG::Attack &&
                 reinterpret_cast<RPG::AnimatableTexture*>(object)->isFinished();
     };
-
-    object->setScaling({2., 2.});
+#define K 2.5f
+    object->setScaling({1. * K, 1. * K});
     SetTargetFPS(60);
-
+    int gamepad = 0;
     while (!WindowShouldClose()) {
-        if (IsKeyDown(KEY_E) && condition()) {
+        if ((IsKeyDown(KEY_E) || IsGamepadButtonDown(gamepad, 7)) && condition()) {
             reinterpret_cast<RPG::AnimatableTexture*>(object)->setAnimationType(RPG::Attack);
+            reinterpret_cast<RPG::AnimatableTexture*>(object)->setAfterAnimation([&]() {
+                SetGamepadVibration(gamepad, 0.01f * IsGamepadButtonDown(gamepad, 7),
+                    0.01f * IsGamepadButtonDown(gamepad, 7), 0.001);
+            });
+        } else if (condition() &&
+            (fabs(GetGamepadAxisMovement(gamepad, GAMEPAD_AXIS_LEFT_X)) > 0.15
+            ||
+             fabs(GetGamepadAxisMovement(gamepad, GAMEPAD_AXIS_LEFT_Y)) > 0.15)
+            ){
+            reinterpret_cast<RPG::AnimatableTexture*>(object)->setAnimationType(RPG::Walking);
+
+            how_to = {GetGamepadAxisMovement(gamepad, GAMEPAD_AXIS_LEFT_X),
+                        GetGamepadAxisMovement(gamepad, GAMEPAD_AXIS_LEFT_Y)};
+
+            object->setScaling({K,
+                K * (GetGamepadAxisMovement(gamepad, GAMEPAD_AXIS_LEFT_X)
+                    / fabs(GetGamepadAxisMovement(gamepad, GAMEPAD_AXIS_LEFT_X)))});
+
+            reinterpret_cast<RPG::AnimatableTexture*>(object)->setAfterAnimation(func);
         } else if (condition() && (IsKeyDown(KEY_W) || IsKeyDown(KEY_A) || IsKeyDown(KEY_S) || IsKeyDown(KEY_D))) {
             reinterpret_cast<RPG::AnimatableTexture*>(object)->setAnimationType(RPG::Walking);
-            how_to = {(float)IsKeyDown(KEY_D) - IsKeyDown(KEY_A),
-                        (float)IsKeyDown(KEY_S) - IsKeyDown(KEY_W)};
+
+            how_to = {(float)IsKeyDown(KEY_D) - IsKeyDown(KEY_A),(float)IsKeyDown(KEY_S) - IsKeyDown(KEY_W)};
+
             if (IsKeyDown(KEY_A)) {
-                object->setScaling({2., -2.});
+                object->setScaling({1 * K, -1. * K});
             } else if (IsKeyDown(KEY_D)) {
-                object->setScaling({2., 2.});
+                object->setScaling({1. * K, 1. * K});
             }
+
             reinterpret_cast<RPG::AnimatableTexture*>(object)->setAfterAnimation(func);
         } else if (condition()) {
             reinterpret_cast<RPG::AnimatableTexture*>(object)->setAnimationType(RPG::Idle);
