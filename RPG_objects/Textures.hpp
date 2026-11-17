@@ -16,7 +16,8 @@ namespace RPG {
         Damaged,
         Dying,
         Eating,
-        Fishing
+        Fishing,
+        Jump
     };
 
 
@@ -293,15 +294,15 @@ namespace RPG {
         };
     private:
         AnimationTypes type_{};
-        int stateAmounts_[8]{};
+        int stateAmounts_[9]{};
         int actualState_{};
-        double frameSpeed_[8]{}; // frameCounter[Frames] * frameSpeed[1/s] >= 60[FPS]
+        double frameSpeed_[9]{}; // frameCounter[Frames] * frameSpeed[1/s] >= 60[FPS]
         int frameCounter_{0};
-        Texture2D textures_[8]{};
-        Rectangle source_rectangles_[8]{};
-        std::function<void()> functionsBefore_[8]{};
-        std::function<void()> functionsAfter_[8]{};
+        Texture2D textures_[9]{};
+        Rectangle source_rectangles_[9]{};
+        std::function<void()> functionsBefore_[9]{};
+        std::function<void()> functionsAfter_[9]{};
         bool finished_{};
-        bool cycled_[8]{};
+        bool cycled_[9]{};
     };
 }

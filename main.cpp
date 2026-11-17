@@ -15,22 +15,26 @@ int main() {
 
     RPG::RPGTexture* object =
         new RPG::AnimatableTexture(
-            "../assets/Orc.png",
-            Rectangle{.x = 0., .y = 0., .width = 100., .height = 100.}, 6, RPG::Idle, true
+            "../assets/FreeCharactersAnimationsAssetPack/SpriteSheets(96x96)/Monster_Slime/With_Shadows/Monster_Slime-Sheet.png",
+            Rectangle{.x = 0., .y = 0., .width = 96., .height = 96.}, 6, RPG::Idle, true
             );
 
     object->setPosition({.x = .0f, .y = 0.f});
     reinterpret_cast<RPG::AnimatableTexture*>(object)->setFrameSpeed(12.);
 
     reinterpret_cast<RPG::AnimatableTexture*>(object)->setTexture<RPG::Attack>(
-        "../assets/Orc.png",
-        Rectangle{.x = 0., .y = 200., .width = 100., .height = 100.}, 4, false);
+        "../assets/FreeCharactersAnimationsAssetPack/SpriteSheets(96x96)/Monster_Slime/With_Shadows/Monster_Slime-Sheet.png",
+        Rectangle{.x = 0., .y = 4. * 96, .width = 96., .height = 96.}, 8, false);
     // reinterpret_cast<RPG::AnimatableTexture*>(object)->setFrameSpeed<RPG::Attack>(8.);
 
     reinterpret_cast<RPG::AnimatableTexture*>(object)->setTexture<RPG::Walking>(
-    "../assets/Orc.png",
-        Rectangle{.x = 0., .y = 100., .width = 100., .height = 100.}, 8, true);
+    "../assets/FreeCharactersAnimationsAssetPack/SpriteSheets(96x96)/Monster_Slime/With_Shadows/Monster_Slime-Sheet.png",
+        Rectangle{.x = 0., .y = 96., .width = 96., .height = 96.}, 8, true);
 
+    reinterpret_cast<RPG::AnimatableTexture*>(object)->setTexture<RPG::Jump>(
+"../assets/FreeCharactersAnimationsAssetPack/SpriteSheets(96x96)/Monster_Slime/With_Shadows/Monster_Slime-Sheet.png",
+        Rectangle{.x = 0., .y = 2 * 96., .width = 96., .height = 96.}, 6, false
+    );
     Vector2 how_to = {0. , 0.};
     auto func = [&]() {
             auto a = object->getPosition();
@@ -41,12 +45,12 @@ int main() {
 
 
     auto condition = [&] () {
-            return reinterpret_cast<RPG::AnimatableTexture*>(object)->getAnimationType() != RPG::Attack
+            return (reinterpret_cast<RPG::AnimatableTexture*>(object)->getAnimationType() != RPG::Attack &&
+            reinterpret_cast<RPG::AnimatableTexture*>(object)->getAnimationType() != RPG::Jump)
                  or
-                reinterpret_cast<RPG::AnimatableTexture*>(object)->getAnimationType() == RPG::Attack &&
-                reinterpret_cast<RPG::AnimatableTexture*>(object)->isFinished();
+            reinterpret_cast<RPG::AnimatableTexture*>(object)->isFinished();
     };
-#define K 2.5f
+#define K 5.5f
     object->setScaling({1. * K, 1. * K});
     SetTargetFPS(60);
     int gamepad = 0;
@@ -57,6 +61,8 @@ int main() {
                 SetGamepadVibration(gamepad, 0.01f * IsGamepadButtonDown(gamepad, 7),
                     0.01f * IsGamepadButtonDown(gamepad, 7), 0.001);
             });
+        } else if ((IsKeyDown(KEY_SPACE) || IsGamepadButtonDown(gamepad, 6)) && condition()) {
+            reinterpret_cast<RPG::AnimatableTexture*>(object)->setAnimationType(RPG::Jump);
         } else if (condition() &&
             (fabs(GetGamepadAxisMovement(gamepad, GAMEPAD_AXIS_LEFT_X)) > 0.15
             ||
@@ -64,8 +70,8 @@ int main() {
             ){
             reinterpret_cast<RPG::AnimatableTexture*>(object)->setAnimationType(RPG::Walking);
 
-            how_to = {GetGamepadAxisMovement(gamepad, GAMEPAD_AXIS_LEFT_X),
-                        GetGamepadAxisMovement(gamepad, GAMEPAD_AXIS_LEFT_Y)};
+            how_to = {2 * GetGamepadAxisMovement(gamepad, GAMEPAD_AXIS_LEFT_X),
+                        2 * GetGamepadAxisMovement(gamepad, GAMEPAD_AXIS_LEFT_Y)};
 
             object->setScaling({K,
                 K * (GetGamepadAxisMovement(gamepad, GAMEPAD_AXIS_LEFT_X)
@@ -91,7 +97,7 @@ int main() {
 
         BeginDrawing();
 
-            ClearBackground(WHITE);
+            ClearBackground(BROWN);
             object->draw();
 
         EndDrawing();
