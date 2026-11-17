@@ -1,6 +1,7 @@
 #pragma once
 #include <algorithm>
 // #include <cassert>
+#include <assert.h>
 #include <string>
 
 #include "raylib.h"
@@ -70,7 +71,16 @@ namespace RPG {
         AnimatableTexture() = default;
 
         AnimatableTexture(const std::string& filename, const Rectangle& rect, int states = 0, const AnimationTypes type = Idle) {
-            setAnimationType(type);
+            type_ = type;
+            setTexture(filename, rect);
+            if (states == 0) {
+                states = textures_[type].width / static_cast<int>(rect.width);
+            }
+            states_[type] = states;
+        }
+
+        AnimatableTexture(const std::string& filename, const Rectangle& rect, const AnimationTypes type = Idle, int states = 0) {
+            type_ = type;
             setTexture(filename, rect);
             if (states == 0) {
                 states = textures_[type].width / static_cast<int>(rect.width);
@@ -79,7 +89,7 @@ namespace RPG {
         }
 
         AnimatableTexture(const std::string& filename, const int& states, const AnimationTypes type = Idle) {
-            setAnimationType(type);
+            type_ = type;
             setTexture(filename, states);
         }
 
@@ -101,6 +111,8 @@ namespace RPG {
             textures_[type] = LoadTexture(std::move(filename).c_str());
             states_[type] = states;
 
+            assert(textures_[type].width % states == 0 && "MISMATCHING TEXTURE SIZE");
+
             source_rectangles_[type] = {
                 .x = 0.f, .y = 0.f,
                 .width = static_cast<float>(textures_[type].width) / static_cast<float>(states),
@@ -111,6 +123,8 @@ namespace RPG {
         void setTexture(const std::string& filename, const int& states) {
             textures_[type_] = LoadTexture(std::move(filename).c_str());
             states_[type_] = states;
+
+            assert(textures_[type_].width % states == 0 && "MISMATCHING TEXTURE SIZE");
 
             source_rectangles_[type_] = {
                 .x = 0.f, .y = 0.f,
