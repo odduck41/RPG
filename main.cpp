@@ -10,28 +10,24 @@ int main() {
 
     InitWindow(screenWidth, screenHeight, "Sprite animation");
 
-    RPG::RPGTexture* object = new RPG::AnimatableTexture;
-    const auto obj = reinterpret_cast<RPG::AnimatableTexture*>(object);
-    obj->setTexture<RPG::Running>("../raylib/examples/textures/resources/scarfy.png", 6);
-    obj->setPosition({350.0f, 280.f});
-    obj->setAnimationType(RPG::Running);
-    obj->setFrameSpeed(60. / 8.);
+    RPG::RPGTexture* object =
+        new RPG::AnimatableTexture("../raylib/examples/textures/resources/scarfy.png", 6, RPG::Running);
+    object->setPosition({.x = 350.0f, .y = 280.f});
+    object->setFrameSpeed(8.); // Frame updates every 1/8 second
     SetTargetFPS(60);
 
     int framesCounter = 0;
 
     while (!WindowShouldClose()) {
         ++framesCounter;
-        if (framesCounter * obj->getFrameSpeed() >= 60) {
+        if (framesCounter * object->getFrameSpeed() >= 60) {
             framesCounter = 0;
-            obj->update();
+            object->update();
         }
 
         BeginDrawing();
 
-            ClearBackground(RAYWHITE);
-            DrawRectangle(400, 225, 100, 100, GREEN);
-
+            ClearBackground(WHITE);
             object->draw();
 
         EndDrawing();

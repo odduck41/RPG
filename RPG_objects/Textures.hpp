@@ -34,6 +34,13 @@ namespace RPG {
             return rotation_;
         }
 
+
+        virtual void setFrameSpeed(const double& speed) = 0;
+
+         [[nodiscard]] virtual double getFrameSpeed() const {
+            return 1.;
+        }
+
         virtual void update() = 0;
         virtual void draw() = 0;
         virtual ~RPGTexture() = default;
@@ -56,6 +63,16 @@ namespace RPG {
     class AnimatableTexture : public RPGTexture {
     public:
         AnimatableTexture() = default;
+
+        AnimatableTexture(const std::string& filename, const Rectangle& rect, const AnimationTypes type = Still) {
+            setAnimationType(type);
+            setTexture(filename, rect);
+        }
+
+        AnimatableTexture(const std::string& filename, const int& states, const AnimationTypes type = Still) {
+            setAnimationType(type);
+            setTexture(filename, states);
+        }
 
         template<AnimationTypes type>
         void setTexture(const std::string& filename, const Rectangle& rect) {
@@ -99,12 +116,12 @@ namespace RPG {
             frameSeed_[type] = speed;
         }
 
-        void setFrameSpeed(const double& speed) {
+        void setFrameSpeed(const double& speed) final {
             // Frame changes every 1 / speed [secs]
             frameSeed_[type_] = speed;
         }
 
-        [[nodiscard]] const double& getFrameSpeed() const {
+        [[nodiscard]] double getFrameSpeed() const final {
             return frameSeed_[type_];
         }
 
