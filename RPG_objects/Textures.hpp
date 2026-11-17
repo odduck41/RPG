@@ -8,7 +8,7 @@
 namespace RPG {
 
     enum AnimationTypes {
-        Still,
+        Idle,
         Walking,
         Running,
         Attack,
