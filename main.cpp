@@ -13,7 +13,7 @@ int main() {
     RPG::RPGTexture* object =
         new RPG::AnimatableTexture("../Solder-Walk.png", 8, RPG::Walking);
     object->setPosition({.x = 150.0f, .y = 80.f});
-    object->setFrameSpeed(1.);
+    object->setFrameSpeed(12.);
     object->setScaling(4);
     SetTargetFPS(60);
 
@@ -33,5 +33,7 @@ int main() {
 
         EndDrawing();
     }
+
+    CloseWindow();
     return 0;
 }
