@@ -6,6 +6,18 @@
 #include "raylib.h"
 
 namespace RPG {
+
+    enum AnimationTypes {
+        Still,
+        Going,
+        Running,
+        Attack,
+        Eating,
+        Fishing
+    };
+
+
+
     class RPGTexture {
     public:
         RPGTexture() = default;
@@ -51,14 +63,7 @@ namespace RPG {
         double rotation_{0};
     };
 
-    enum AnimationTypes {
-        Still,
-        Going,
-        Running,
-        Attack,
-        Eating,
-        Fishing
-    };
+
 
     class AnimatableTexture : public RPGTexture {
     public:
