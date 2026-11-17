@@ -105,28 +105,42 @@ namespace RPG {
         }
 
         template<AnimationTypes type>
-        void setTexture(const std::string& filename, const int& states) {
+        void setTexture(const std::string& filename, const Rectangle& rect, const int& amount) {
             textures_[type] = LoadTexture(std::move(filename).c_str());
-            stateAmounts_[type] = states;
+            source_rectangles_[type] = rect;
+            stateAmounts_[type] = amount;
+        }
 
-            assert(textures_[type].width % states == 0 && "MISMATCHING TEXTURE SIZE");
+        void setTexture(const std::string& filename, const Rectangle& rect, const int& amount) {
+            textures_[type_] = LoadTexture(std::move(filename).c_str());
+            source_rectangles_[type_] = rect;
+            stateAmounts_[type_] = amount;
+        }
+
+
+        template<AnimationTypes type>
+        void setTexture(const std::string& filename, const int& amount) {
+            textures_[type] = LoadTexture(std::move(filename).c_str());
+            stateAmounts_[type] = amount;
+
+            assert(textures_[type].width % amount == 0 && "MISMATCHING TEXTURE SIZE");
 
             source_rectangles_[type] = {
                 .x = 0.f, .y = 0.f,
-                .width = static_cast<float>(textures_[type].width) / static_cast<float>(states),
+                .width = static_cast<float>(textures_[type].width) / static_cast<float>(amount),
                 .height = static_cast<float>(textures_[type].height)
             };
         }
 
-        void setTexture(const std::string& filename, const int& states) {
+        void setTexture(const std::string& filename, const int& amount) {
             textures_[type_] = LoadTexture(std::move(filename).c_str());
-            stateAmounts_[type_] = states;
+            stateAmounts_[type_] = amount;
 
-            assert(textures_[type_].width % states == 0 && "MISMATCHING TEXTURE SIZE");
+            assert(textures_[type_].width % amount == 0 && "MISMATCHING TEXTURE SIZE");
 
             source_rectangles_[type_] = {
                 .x = 0.f, .y = 0.f,
-                .width = static_cast<float>(textures_[type_].width) / static_cast<float>(states),
+                .width = static_cast<float>(textures_[type_].width) / static_cast<float>(amount),
                 .height = static_cast<float>(textures_[type_].height)
             };
         }
@@ -158,7 +172,7 @@ namespace RPG {
 
 
         void setAnimationType(const AnimationTypes& type) {
-            type_ = type;
+            asked_ = type;
         }
 
         [[nodiscard]] const AnimationTypes& getAnimationType() const {
@@ -188,9 +202,11 @@ namespace RPG {
 
 
         void update() override {
+            if (frameSpeed_[type_] == 0) frameSpeed_[type_] = (1. + 1./3.) * stateAmounts_[type_];
             if (frameCounter_ * frameSpeed_[type_] < 60) return;
             frameCounter_ = 0;
             ++actualState_; actualState_ %= stateAmounts_[type_];
+            if (actualState_ == 0) type_ = asked_;
 
             source_rectangles_[type_].x =
                 static_cast<float>(actualState_) * source_rectangles_[type_].width;
@@ -215,6 +231,7 @@ namespace RPG {
         };
     private:
         AnimationTypes type_{};
+        AnimationTypes asked_{};
         int stateAmounts_[8]{};
         int actualState_{};
         double frameSpeed_[8]{}; // frameCounter[Frames] * frameSpeed[1/s] >= 60[FPS]
