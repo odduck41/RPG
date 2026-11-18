@@ -10,56 +10,43 @@
 
 #define screenWidth 800
 #define screenHeight 450
+#define K 4.f
 
 int main() {
     InitWindow(screenWidth, screenHeight, "Sprites");
     const auto sprite = new RPG::AnimatableSprite();
-    sprite->setScaling(Vector2{3., 3.});
-    sprite->addFile("Idle", {
-        .path = "../assets/Farm RPG FREE 16x16 - Tiny Asset Pack/Character/Idle.png",
-        .sheet_width = 128 / 4, .sheet_height = 96 / 3
+    sprite->addFile("Soldier", {
+        .path = "/Users/leo/programming/RPG/assets/FreeCharactersAnimationsAssetPack/SpriteSheets(96x96)/Human_Soldier_Sword_Shield/With_Shadows/Human_Soldier_Sword_Shield-Sheet.png",
+        .sheet_width = 960 / 10, .sheet_height = 768 / 8
     });
-    sprite->addAnimation("Idle", RPG::TextureAnimation(4, 10, true));
-    sprite->addAnimation("IdleBack", RPG::TextureAnimation(4, 10, true));
-    sprite->addAnimation("IdleRight", RPG::TextureAnimation(4, 10, true));
+    sprite->setScaling({1. * K, 1. * K});
+    sprite->addAnimation("Idle", RPG::TextureAnimation(6, true));
 
-    sprite->addFile("Walk", {
-        .path = "../assets/Farm RPG FREE 16x16 - Tiny Asset Pack/Character/Walk.png",
-        .sheet_width = 128 / 4, .sheet_height = 96 / 3
-    });
-
-
-    sprite->addAnimation("WalkDown", "Walk", RPG::TextureAnimation(4, 10, true), [&]() {
+    Vector2 how_to = {0., 0.};
+    sprite->addAnimation("Walk", RPG::TextureAnimation(8, true), [&]() {
         auto pos = sprite->getPosition();
-        pos.y += 3 * sprite->getScaling().x;
+        pos.x += how_to.x * K * 2;
+        pos.y += how_to.y * K * 2;
         sprite->setPosition(pos);
     });
-    sprite->addAnimation("WalkUp", "Walk", RPG::TextureAnimation(4, 10, true), [&]() {
-        auto pos = sprite->getPosition();
-        pos.y -= 3 * sprite->getScaling().x;
-        sprite->setPosition(pos);
-    });
-    sprite->addAnimation("WalkRight", "Walk", RPG::TextureAnimation(4, 10, true), [=]() {
-        auto pos = sprite->getPosition();
-        pos.x += 3 * sprite->getScaling().y;
-        sprite->setPosition(pos);
-    });
+
+    sprite->addAnimation("Jump", RPG::TextureAnimation(6, false, true));
 
     SetTargetFPS(60);
 
     while (!WindowShouldClose()) {
         sprite->update();
-        if (IsKeyDown(KEY_S)) {
-            sprite->switchAnimation("WalkDown");
-        } else if (IsKeyDown(KEY_W)) {
-            sprite->switchAnimation("WalkUp");
-        } else if (IsKeyDown(KEY_D)) {
-            sprite->setScaling(Vector2{3., 3.});
-            sprite->switchAnimation("WalkRight");
-        } else if (IsKeyDown(KEY_A)) {
-            sprite->setScaling(Vector2{3., -3.});
-            sprite->switchAnimation("WalkRight");
-        } else {
+        if (sprite->isFinished() && IsKeyDown(KEY_SPACE)) {
+            sprite->switchAnimation("Jump");
+        } else if (sprite->isFinished() && (IsKeyDown(KEY_W) || IsKeyDown(KEY_A) || IsKeyDown(KEY_S) || IsKeyDown(KEY_D))) {
+            how_to = {(float)IsKeyDown(KEY_D) - IsKeyDown(KEY_A), (float)IsKeyDown(KEY_S) - IsKeyDown(KEY_W)};
+            if (IsKeyDown(KEY_A)) {
+                sprite->setScaling({1 * K, -1. * K});
+            } else if (IsKeyDown(KEY_D)) {
+                sprite->setScaling({1. * K, 1. * K});
+            }
+            sprite->switchAnimation("Walk");
+        } else if (sprite->isFinished()) {
             sprite->switchAnimation("Idle");
         }
         BeginDrawing();

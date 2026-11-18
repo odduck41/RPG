@@ -19,15 +19,16 @@ namespace RPG {
 
     struct TextureAnimation {
         TextureAnimation() = default;
-        TextureAnimation(const unsigned int& fA, const double& fS, const bool& c)
-            : frameAmount(fA), frameSpeed(fS), cycled(c) {}
+        TextureAnimation(const unsigned int& fA, const double& fS, const bool& c, const bool& aF)
+            : frameAmount(fA), frameSpeed(fS), cycled(c), asksFinishing(aF) {}
 
-        explicit TextureAnimation(const unsigned int& fA, const bool& c = true)
-            : frameAmount(fA), cycled(c) {frameSpeed = 1.5 * fA;}
+        explicit TextureAnimation(const unsigned int& fA, const bool& c = true, const bool& aF = false)
+            : frameAmount(fA), cycled(c), asksFinishing(aF) {frameSpeed = 1.5 * fA;}
 
         unsigned int frameAmount{};
         double frameSpeed{};
         bool cycled{false};
+        bool asksFinishing{false};
     };
 
     class Sprite {
@@ -130,8 +131,17 @@ namespace RPG {
             addAnimation(animation_alias, file_info_.begin()->first, animation, callback);
         }
 
+
+        bool isFinished() {
+            return !animation_info_[current_animation_].animation.asksFinishing || finished;
+        }
+
         void switchAnimation(const std::string& animation_alias) {
+            if (animation_alias == current_animation_) return;
             current_animation_ = animation_alias;
+            frameCounter_ = 0;
+            currentFrame = 0;
+            finished = false;
         }
 
         void update() override {
@@ -141,6 +151,7 @@ namespace RPG {
             frameCounter_ = 0;
             ++currentFrame;
             currentFrame %= animation_info_[current_animation_].animation.frameAmount;
+            if (currentFrame == 0) finished = true;
 
             animation_info_[current_animation_].callback();
         }
@@ -174,6 +185,7 @@ namespace RPG {
         std::size_t frameCounter_{};
         std::string current_animation_{};
         unsigned int currentFrame{};
+        bool finished{false};
 
         struct FileInfo_ {
             File file{};
