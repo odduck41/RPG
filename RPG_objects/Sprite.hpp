@@ -145,6 +145,13 @@ namespace RPG {
             finished = false;
         }
 
+        void switchAnimationForce(const std::string& animation_alias) {
+            current_animation_ = animation_alias;
+            frameCounter_ = 0;
+            currentFrame = 0;
+            finished = false;
+        }
+
         void update() override {
             if (static_cast<double>(frameCounter_) * animation_info_[current_animation_].animation.frameSpeed < GetFPS())
                 return;
