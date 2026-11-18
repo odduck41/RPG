@@ -22,10 +22,10 @@ namespace RPG {
 
 
 
-    class RPGTexture {
+    class Sprite {
     public:
-        RPGTexture() = default;
-        explicit RPGTexture(const Vector2& pos) : position_(pos) {}
+        Sprite() = default;
+        explicit Sprite(const Vector2& pos) : position_(pos) {}
         void show() {visible_ = true;}
         void hide() {visible_ = false;}
 
@@ -53,43 +53,47 @@ namespace RPG {
 
         virtual void update() = 0;
         virtual void draw() = 0;
-        virtual ~RPGTexture() = default;
+        virtual ~Sprite() = default;
     protected:
         bool visible_{true};
         Vector2 position_{};
-        Vector2 scaling_{1., 1.};
+        Vector2 scaling_{.x = 1., .y = 1.};
         double rotation_{0};
+        Texture2D texture_{};
     };
 
 
 
-    class AnimatableTexture : public RPGTexture {
+    class AnimatableSprite : public Sprite {
     public:
-        AnimatableTexture() = default;
+        AnimatableSprite() = default;
 
-        AnimatableTexture(const std::string& filename, const Rectangle& rect, int states = 0, const AnimationTypes type = Idle, const bool cycled = false) {
+        AnimatableSprite(const std::string& filename, const Rectangle& rect, int states = 0, const AnimationTypes type = Idle, const bool cycled = false) {
             type_ = type;
-            setTexture(filename, rect);
+            texture_ = LoadTexture(filename.c_str());
+            setTexture(rect);
             if (states == 0) {
-                states = textures_[type].width / static_cast<int>(rect.width);
+                states = texture_.width / static_cast<int>(rect.width);
             }
             stateAmounts_[type] = states;
             cycled_[type] = cycled;
         }
 
-        AnimatableTexture(const std::string& filename, const Rectangle& rect, const AnimationTypes type = Idle, int states = 0, const bool cycled = false) {
+        AnimatableSprite(const std::string& filename, const Rectangle& rect, const AnimationTypes type = Idle, int states = 0, const bool cycled = false) {
             type_ = type;
-            setTexture(filename, rect);
+            texture_ = LoadTexture(filename.c_str());
+            setTexture(rect);
             if (states == 0) {
-                states = textures_[type].width / static_cast<int>(rect.width);
+                states = texture_.width / static_cast<int>(rect.width);
             }
             stateAmounts_[type] = states;
             cycled_[type] = cycled;
         }
 
-        AnimatableTexture(const std::string& filename, const int& states, const AnimationTypes type = Idle, const bool cycled = false) {
+        AnimatableSprite(const std::string& filename, const int& states, const AnimationTypes type = Idle, const bool cycled = false) {
             type_ = type;
-            setTexture(filename, states);
+            texture_ = LoadTexture(filename.c_str());
+            setTexture(states);
             cycled_[type] = cycled;
         }
 
@@ -97,33 +101,29 @@ namespace RPG {
 
 
         template<AnimationTypes type>
-        void setTexture(const std::string& filename, const Rectangle& rect, const bool cycled = false) {
-            textures_[type] = LoadTexture(std::move(filename).c_str());
+        void setTexture(const Rectangle& rect, const bool cycled = false) {
             source_rectangles_[type] = rect;
-            stateAmounts_[type] = textures_[type].width / static_cast<int>(rect.width);
+            stateAmounts_[type] = texture_.width / static_cast<int>(rect.width);
 
             cycled_[type] = cycled;
         }
 
-        void setTexture(const std::string& filename, const Rectangle& rect, const bool cycled = false) {
-            textures_[type_] = LoadTexture(std::move(filename).c_str());
+        void setTexture(const Rectangle& rect, const bool cycled = false) {
             source_rectangles_[type_] = rect;
-            stateAmounts_[type_] = textures_[type_].width / static_cast<int>(rect.width);
+            stateAmounts_[type_] = texture_.width / static_cast<int>(rect.width);
 
             cycled_[type_] = cycled;
         }
 
         template<AnimationTypes type>
-        void setTexture(const std::string& filename, const Rectangle& rect, const int& amount, const bool cycled = false) {
-            textures_[type] = LoadTexture(std::move(filename).c_str());
+        void setTexture(const Rectangle& rect, const int& amount, const bool cycled = false) {
             source_rectangles_[type] = rect;
             stateAmounts_[type] = amount;
 
             cycled_[type] = cycled;
         }
 
-        void setTexture(const std::string& filename, const Rectangle& rect, const int& amount, const bool cycled = false) {
-            textures_[type_] = LoadTexture(std::move(filename).c_str());
+        void setTexture(const Rectangle& rect, const int& amount, const bool cycled = false) {
             source_rectangles_[type_] = rect;
             stateAmounts_[type_] = amount;
 
@@ -132,31 +132,29 @@ namespace RPG {
 
 
         template<AnimationTypes type>
-        void setTexture(const std::string& filename, const int& amount, const bool cycled = false) {
-            textures_[type] = LoadTexture(std::move(filename).c_str());
+        void setTexture(const int& amount, const bool cycled = false) {
             stateAmounts_[type] = amount;
 
-            assert(textures_[type].width % amount == 0 && "MISMATCHING TEXTURE SIZE");
+            assert(texture_.width % amount == 0 && "MISMATCHING TEXTURE SIZE");
 
             source_rectangles_[type] = {
                 .x = 0.f, .y = 0.f,
-                .width = static_cast<float>(textures_[type].width) / static_cast<float>(amount),
-                .height = static_cast<float>(textures_[type].height)
+                .width = static_cast<float>(texture_.width) / static_cast<float>(amount),
+                .height = static_cast<float>(texture_.height)
             };
 
             cycled_[type] = cycled;
         }
 
-        void setTexture(const std::string& filename, const int& amount, const bool cycled = false) {
-            textures_[type_] = LoadTexture(std::move(filename).c_str());
+        void setTexture(const int& amount, const bool cycled = false) {
             stateAmounts_[type_] = amount;
 
-            assert(textures_[type_].width % amount == 0 && "MISMATCHING TEXTURE SIZE");
+            assert(texture_.width % amount == 0 && "MISMATCHING TEXTURE SIZE");
 
             source_rectangles_[type_] = {
                 .x = 0.f, .y = 0.f,
-                .width = static_cast<float>(textures_[type_].width) / static_cast<float>(amount),
-                .height = static_cast<float>(textures_[type_].height)
+                .width = static_cast<float>(texture_.width) / static_cast<float>(amount),
+                .height = static_cast<float>(texture_.height)
             };
 
             cycled_[type_] = cycled;
@@ -282,15 +280,15 @@ namespace RPG {
             source_rect.width *= scaling_.y / fabs(scaling_.y);
 
             if (functionsBefore_[type_] != nullptr) functionsBefore_[type_]();
-            DrawTexturePro(textures_[type_], source_rect, dest_rect,
+            DrawTexturePro(texture_, source_rect, dest_rect,
                             Vector2{.x = 0, .y = 0}, static_cast<float>(rotation_), WHITE);
             if (functionsAfter_[type_] != nullptr) functionsAfter_[type_]();
 
             ++frameCounter_;
         }
 
-        ~AnimatableTexture() override {
-            std::ranges::for_each(textures_, UnloadTexture);
+        ~AnimatableSprite() override {
+            UnloadTexture(texture_);
         };
     private:
         AnimationTypes type_{};
@@ -298,7 +296,6 @@ namespace RPG {
         int actualState_{};
         double frameSpeed_[9]{}; // frameCounter[Frames] * frameSpeed[1/s] >= 60[FPS]
         int frameCounter_{0};
-        Texture2D textures_[9]{};
         Rectangle source_rectangles_[9]{};
         std::function<void()> functionsBefore_[9]{};
         std::function<void()> functionsAfter_[9]{};
