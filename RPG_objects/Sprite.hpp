@@ -18,7 +18,7 @@ namespace RPG {
 
         FORCE_INLINE virtual void loadTexture() = 0;
         FORCE_INLINE virtual void unloadTexture() = 0;
-        FORCE_INLINE virtual bool isTextureLoaded() = 0;
+        [[nodiscard]] FORCE_INLINE virtual bool isTextureLoaded() const = 0;
 
         virtual ~TextureData() = 0;
     protected:
@@ -28,4 +28,42 @@ namespace RPG {
         std::string data_{};
     };
 
+    class SoloFileTexture : public TextureData {
+    public:
+        SoloFileTexture() = default;
+        explicit SoloFileTexture(std::string data) : TextureData(std::move(data)) {
+            if (IsWindowReady()) {
+                texture_ = LoadTexture(data_.c_str());
+            }
+        }
+
+        FORCE_INLINE void changeTexture(const std::string& filename) {
+            _changeTextureData(filename);
+            if (isTextureLoaded()) {
+                unloadTexture();
+                loadTexture();
+            } else {
+                loadTexture();
+            }
+        }
+
+        FORCE_INLINE void loadTexture() override {
+            if (IsWindowReady()) {
+                texture_ = LoadTexture(data_.c_str());
+            }
+        }
+
+        FORCE_INLINE void unloadTexture() override {
+            if (IsTextureValid(texture_)) {
+                UnloadTexture(texture_);
+            }
+        }
+
+        [[nodiscard]] FORCE_INLINE bool isTextureLoaded() const override {
+            return IsTextureValid(texture_);
+        }
+
+    private:
+        Texture2D texture_{};
+    };
 }
