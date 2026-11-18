@@ -6,7 +6,6 @@
 
 #include "raylib.h"
 #include "RPG_objects/Sprite.hpp"
-#include "RPG_objects/Textures.hpp"
 
 #define screenWidth 800
 #define screenHeight 450
@@ -22,7 +21,7 @@ int main() {
     sprite->setScaling({1. * K, 1. * K});
     sprite->addAnimation("Idle", RPG::TextureAnimation(6, true));
 
-    Vector2 how_to = {0., 0.};
+    Vector2 how_to = {.x = 0., .y = 0.};
     sprite->addAnimation("Walk", RPG::TextureAnimation(8, true), [&]() {
         auto pos = sprite->getPosition();
         pos.x += how_to.x * K * 2;
@@ -40,9 +39,9 @@ int main() {
             sprite->switchAnimation("Jump");
         } else if ((IsKeyDown(KEY_W) || IsKeyDown(KEY_A) || IsKeyDown(KEY_S) || IsKeyDown(KEY_D))) {
             how_to = {(float)IsKeyDown(KEY_D) - IsKeyDown(KEY_A), (float)IsKeyDown(KEY_S) - IsKeyDown(KEY_W)};
-            if (sprite->isFinished() && IsKeyDown(KEY_A)) {
+            if (IsKeyDown(KEY_A)) {
                 sprite->setScaling({1 * K, -1. * K});
-            } else if (sprite->isFinished() && IsKeyDown(KEY_D)) {
+            } else if (IsKeyDown(KEY_D)) {
                 sprite->setScaling({1. * K, 1. * K});
             }
             sprite->switchAnimation("Walk");

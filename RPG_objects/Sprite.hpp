@@ -96,6 +96,22 @@ namespace RPG {
             throw std::runtime_error("Empty file_alias for animation!");
         }
 
+        void removeFile(const std::string& file_alias) {
+            if (!file_info_.contains(file_alias)) return;
+            bool hanged = false;
+            for (std::size_t i = 0; !hanged && i < file_info_[file_alias].free_sheets.size(); ++i) {
+                hanged |= file_info_[file_alias].free_sheets[i];
+            }
+
+            if (hanged) throw std::runtime_error("Trying to unload file with animations related on it!");
+
+            file_paths_.erase(file_info_[file_alias].file.path);
+
+            UnloadTexture(file_info_[file_alias].texture);
+
+            file_info_.erase(file_alias);
+        }
+
 
         void addAnimation(const std::string& animation_alias, const std::string& file_alias,
             const TextureAnimation& animation, const std::function<void()>& callback = [](){}) {
