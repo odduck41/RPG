@@ -36,17 +36,17 @@ int main() {
 
     while (!WindowShouldClose()) {
         sprite->update();
-        if (sprite->isFinished() && IsKeyDown(KEY_SPACE)) {
+        if (IsKeyDown(KEY_SPACE)) {
             sprite->switchAnimation("Jump");
-        } else if (sprite->isFinished() && (IsKeyDown(KEY_W) || IsKeyDown(KEY_A) || IsKeyDown(KEY_S) || IsKeyDown(KEY_D))) {
+        } else if ((IsKeyDown(KEY_W) || IsKeyDown(KEY_A) || IsKeyDown(KEY_S) || IsKeyDown(KEY_D))) {
             how_to = {(float)IsKeyDown(KEY_D) - IsKeyDown(KEY_A), (float)IsKeyDown(KEY_S) - IsKeyDown(KEY_W)};
-            if (IsKeyDown(KEY_A)) {
+            if (sprite->isFinished() && IsKeyDown(KEY_A)) {
                 sprite->setScaling({1 * K, -1. * K});
-            } else if (IsKeyDown(KEY_D)) {
+            } else if (sprite->isFinished() && IsKeyDown(KEY_D)) {
                 sprite->setScaling({1. * K, 1. * K});
             }
             sprite->switchAnimation("Walk");
-        } else if (sprite->isFinished()) {
+        } else {
             sprite->switchAnimation("Idle");
         }
         BeginDrawing();
