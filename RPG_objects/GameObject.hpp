@@ -1,7 +1,7 @@
 #pragma once
 #include <string>
 #include "raylib.h"
-#include "Textures.hpp"
+#include "Sprite.hpp"
 
 namespace RPG {
     class GameObject {

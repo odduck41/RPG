@@ -2,7 +2,7 @@
 #include <iostream>
 
 #include "raylib.h"
-#include "RPG_objects/Textures.hpp"
+#include "RPG_objects/Sprite.hpp"
 
 
 int main() {
@@ -15,16 +15,15 @@ int main() {
 
     RPG::Sprite* object =
         new RPG::AnimatableSprite(
-            "../assets/FreeCharactersAnimationsAssetPack/SpriteSheets(96x96)/Monster_Slime/With_Shadows/Monster_Slime-Sheet.png",
+            "../assets/FreeCharactersAnimationsAssetPack/SpriteSheets(96x96)/Human_Soldier_Sword_Shield/With_Shadows/Human_Soldier_Sword_Shield-Sheet.png",
             Rectangle{.x = 0., .y = 0., .width = 96., .height = 96.}, 6, RPG::Idle, true
-            );
+        );
 
     object->setPosition({.x = .0f, .y = 0.f});
     reinterpret_cast<RPG::AnimatableSprite*>(object)->setFrameSpeed(12.);
 
     reinterpret_cast<RPG::AnimatableSprite*>(object)->setTexture<RPG::Attack>(
         Rectangle{.x = 0., .y = 4. * 96, .width = 96., .height = 96.}, 8, false);
-    // reinterpret_cast<RPG::AnimatableTexture*>(object)->setFrameSpeed<RPG::Attack>(8.);
 
     reinterpret_cast<RPG::AnimatableSprite*>(object)->setTexture<RPG::Walking>(
         Rectangle{.x = 0., .y = 96., .width = 96., .height = 96.}, 8, true);
@@ -32,6 +31,7 @@ int main() {
     reinterpret_cast<RPG::AnimatableSprite*>(object)->setTexture<RPG::Jump>(
         Rectangle{.x = 0., .y = 2 * 96., .width = 96., .height = 96.}, 6, false
     );
+
     Vector2 how_to = {0. , 0.};
     auto func = [&]() {
             auto a = object->getPosition();
@@ -47,10 +47,13 @@ int main() {
                  or
             reinterpret_cast<RPG::AnimatableSprite*>(object)->isFinished();
     };
+
 #define K 5.5f
+
     object->setScaling({1. * K, 1. * K});
     SetTargetFPS(60);
     int gamepad = 0;
+
     while (!WindowShouldClose()) {
         reinterpret_cast<RPG::AnimatableSprite*>(object)->setAfterAnimation([](){});
         if ((IsKeyDown(KEY_E) || IsGamepadButtonDown(gamepad, 7)) && condition()) {
@@ -64,14 +67,12 @@ int main() {
             });
         } else if ((IsKeyDown(KEY_SPACE) || IsGamepadButtonDown(gamepad, 6)) && condition()) {
             reinterpret_cast<RPG::AnimatableSprite*>(object)->setAnimationType(RPG::Jump);
-        } else if (
+        } else if (condition() &&
             (fabs(GetGamepadAxisMovement(gamepad, GAMEPAD_AXIS_LEFT_X)) > 0.15
             ||
              fabs(GetGamepadAxisMovement(gamepad, GAMEPAD_AXIS_LEFT_Y)) > 0.15)
             ){
-            if (condition()) {
-                reinterpret_cast<RPG::AnimatableSprite*>(object)->setAnimationType(RPG::Walking);
-            }
+            reinterpret_cast<RPG::AnimatableSprite*>(object)->setAnimationType(RPG::Walking);
             how_to = {2 * GetGamepadAxisMovement(gamepad, GAMEPAD_AXIS_LEFT_X),
                         2 * GetGamepadAxisMovement(gamepad, GAMEPAD_AXIS_LEFT_Y)};
 
@@ -80,10 +81,8 @@ int main() {
                     / fabs(GetGamepadAxisMovement(gamepad, GAMEPAD_AXIS_LEFT_X)))});
 
             reinterpret_cast<RPG::AnimatableSprite*>(object)->setAfterAnimation(func);
-        } else if ((IsKeyDown(KEY_W) || IsKeyDown(KEY_A) || IsKeyDown(KEY_S) || IsKeyDown(KEY_D))) {
-            if (condition()) {
-                reinterpret_cast<RPG::AnimatableSprite*>(object)->setAnimationType(RPG::Walking);
-            }
+        } else if (condition() && (IsKeyDown(KEY_W) || IsKeyDown(KEY_A) || IsKeyDown(KEY_S) || IsKeyDown(KEY_D))) {
+            reinterpret_cast<RPG::AnimatableSprite*>(object)->setAnimationType(RPG::Walking);
             how_to = {(float)IsKeyDown(KEY_D) - IsKeyDown(KEY_A),(float)IsKeyDown(KEY_S) - IsKeyDown(KEY_W)};
 
             if (IsKeyDown(KEY_A)) {
@@ -91,6 +90,7 @@ int main() {
             } else if (IsKeyDown(KEY_D)) {
                 object->setScaling({1. * K, 1. * K});
             }
+
             reinterpret_cast<RPG::AnimatableSprite*>(object)->setAfterAnimation(func);
         } else if (condition()) {
             reinterpret_cast<RPG::AnimatableSprite*>(object)->setAnimationType(RPG::Idle);
