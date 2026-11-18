@@ -147,6 +147,15 @@ namespace RPG {
             addAnimation(animation_alias, file_info_.begin()->first, animation, callback);
         }
 
+        void removeAnimation(const std::string& animation_alias) {
+            if (animation_alias == current_animation_) throw std::runtime_error("NONONO, U'RE TRYING TO DO SOME SHIT");
+
+            const auto file = animation_info_[animation_alias].file_alias;
+            file_info_[file].free_sheets[animation_info_[animation_alias].sheet] = false;
+
+            animation_info_.erase(animation_alias);
+        }
+
 
         bool isFinished() {
             return !animation_info_[current_animation_].animation.asksFinishing || finished;
