@@ -11,51 +11,21 @@
 
 namespace RPG {
 
-    class SoloFileTexture {
+    class TextureData {
     public:
-        SoloFileTexture() = default;
-        explicit SoloFileTexture(std::string filename) : filename_(std::move(filename)) {
-            if (IsWindowReady()) {
-                texture_ = LoadTexture(filename_.c_str());
-            }
-        }
+        TextureData() = default;
+        explicit TextureData(std::string data) : data_(std::move(data)) {}
 
-        FORCE_INLINE void loadTexture() {
-            if (!IsTextureValid(texture_)) {
-                if (IsWindowReady()) {
-                    texture_ = LoadTexture(filename_.c_str());
-                }
-            }
-        }
+        FORCE_INLINE virtual void loadTexture() = 0;
+        FORCE_INLINE virtual void unloadTexture() = 0;
+        FORCE_INLINE virtual bool isTextureLoaded() = 0;
 
-        FORCE_INLINE void unloadTexture() const {
-            if (IsTextureValid(texture_)) {
-                UnloadTexture(texture_);
-            }
-        }
-
-        [[nodiscard]] FORCE_INLINE bool isTextureLoaded() const {
-            return IsTextureValid(texture_);
-        }
-
-        FORCE_INLINE void changeTexture(std::string filename) {
-            filename_ = std::move(filename);
-            unloadTexture();
-            loadTexture();
-        }
-
-        virtual ~SoloFileTexture() {
-            if (IsTextureValid(texture_)) {
-                UnloadTexture(texture_);
-            }
-        };
+        virtual ~TextureData() = 0;
     protected:
-        Texture2D texture_{};
-        std::string filename_{};
-    };
-
-    class MultipleFileTexture {
-
+        FORCE_INLINE void _changeTextureData(std::string data) {
+            data_ = std::move(data);
+        }
+        std::string data_{};
     };
 
 }

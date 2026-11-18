@@ -1,4 +1,8 @@
 #include <iostream>
+#include <vector>
+
+#include <string>
+#include <sstream>
 
 #include "raylib.h"
 #include "RPG_objects/Sprite.hpp"
@@ -7,8 +11,8 @@
 #define screenHeight 450
 
 int main() {
-    InitWindow(screenWidth, screenHeight, "Sprites");
+    // InitWindow(screenWidth, screenHeight, "Sprites");
 
-    CloseWindow();
+    // CloseWindow();
     return 0;
 }
