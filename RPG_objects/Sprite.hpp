@@ -49,6 +49,14 @@ namespace RPG {
             return rotation_;
         }
 
+        FORCE_INLINE void setSourceRectangle(Rectangle rectangle) {
+            source_rectangle_ = std::move(rectangle);
+        }
+
+        [[nodiscard]] FORCE_INLINE const Rectangle& getSourceRectangle() const {
+            return source_rectangle_;
+        }
+
 
         FORCE_INLINE virtual void update() = 0;
         FORCE_INLINE virtual void draw() = 0;
@@ -64,7 +72,21 @@ namespace RPG {
         Rectangle source_rectangle_{};
     };
 
-    class AnimatableSprite {
+    class TextureAnimation {
+    public:
+        explicit TextureAnimation(const int& fA = 0, const double& fS = 0., std::function<void()> cb = nullptr)
+            : framesAmount_(fA), frameSpeed_(fS), callback_(std::move(cb)) {}
+
+        friend class AnimatableSprite;
+    private:
+        int framesAmount_{};
+        double frameSpeed_{}; // FPS
+        std::function<void()> callback_{};
+    };
+
+    class AnimatableSprite : public Sprite {
+    public:
+    private:
 
     };
 }
