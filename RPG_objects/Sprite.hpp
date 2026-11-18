@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cassert>
+#include <functional>
 #include <map>
 #include <set>
 #include <vector>
@@ -18,10 +19,16 @@ namespace RPG {
     };
 
     struct TextureAnimation {
-        std::string alias{};
+        TextureAnimation() = default;
+        TextureAnimation(const unsigned int& fA, const double& fS, const bool& c)
+            : frameAmount(fA), frameSpeed(fS), cycled(c) {}
+
+        explicit TextureAnimation(const unsigned int& fA, const bool& c = true)
+            : frameAmount(fA), cycled(c) {frameSpeed = 1.5 * fA;}
+
         unsigned int frameAmount{};
         double frameSpeed{};
-        bool cycled{};
+        bool cycled{false};
     };
 
     class Sprite {
@@ -89,17 +96,60 @@ namespace RPG {
             throw std::runtime_error("Empty file_alias for animation!");
         }
 
-        virtual void update() {}
-        virtual void draw() {}
+
+        void addAnimation(const std::string& animation_alias, const std::string& file_alias,
+            const TextureAnimation& animation, const std::function<void()>& callback = [](){}) {
+            if (animation_info_.contains(animation_alias))
+                throw std::runtime_error("Trying to write 2 different animations with one alias");
+
+            unsigned int index = 0;
+            for (; index < file_info_[file_alias].free_sheets.size() &&
+                           file_info_[file_alias].free_sheets[index]; ++index) {}
+
+            if (index == file_info_[file_alias].free_sheets.size())
+                throw std::runtime_error("Trying to hang animation up to full file");
+
+            file_info_[file_alias].free_sheets[index] = true;
+
+            animation_info_[animation_alias] = {
+                .file_alias = file_alias,
+                .animation = animation,
+                .callback = callback,
+                .sheet = index
+            };
+        }
+
+        void addAnimation(const std::string& animation_alias,
+            const TextureAnimation& animation, const std::function<void()>& callback = [](){}) {
+            if (file_paths_.size() > 1) throw std::runtime_error("You are trying to hang animation up to all files.");
+            if (file_info_.empty()) throw std::runtime_error("You are trying to hang animation up... Nowhere");
+
+            addAnimation(animation_alias, file_info_.begin()->first, animation, callback);
+        }
+
+        virtual void update() {
+
+        }
+
+        virtual void draw() {
+
+        }
 
     private:
-        std::unordered_set<std::string> file_paths_{};
         struct FileInfo_ {
             File file{};
             Texture2D texture{};
             std::vector<bool> free_sheets{};
-            int current_sheet{};
         };
+        struct AnimationInfo_ {
+            std::string file_alias{};
+            TextureAnimation animation{};
+            std::function<void()> callback{};
+            unsigned int sheet{};
+        };
+
+        std::unordered_set<std::string> file_paths_{};
         std::map<std::string, FileInfo_> file_info_{};
+        std::map<std::string, AnimationInfo_> animation_info_{};
     };
 }

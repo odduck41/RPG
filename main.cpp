@@ -17,11 +17,15 @@ int main() {
     // objects.push_back(new RPG::SoloFileTexture());
     // objects.push_back(new RPG::MultipleFileTexture<>());
     // objects.push_back(new RPG::MultipleFileTexture<std::vector<Texture2D>>());
-    RPG::Sprite* sprite = new RPG::AnimatableSprite();
+    RPG::AnimatableSprite* sprite = new RPG::AnimatableSprite();
     sprite->addFile("Idle", {
         .path = "../assets/Farm RPG FREE 16x16 - Tiny Asset Pack/Character/Idle.png",
         .sheet_width = 128 / 4, .sheet_height = 96 / 3
     });
+
+    sprite->addAnimation("Idle", RPG::TextureAnimation(4, true));
+    sprite->addAnimation("IdleBack", RPG::TextureAnimation(4, true));
+    sprite->addAnimation("IdleRight", RPG::TextureAnimation(4, true));
     CloseWindow();
     return 0;
 }
