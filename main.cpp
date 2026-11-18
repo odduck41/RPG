@@ -105,6 +105,7 @@ int main() {
         EndDrawing();
     }
 
+    delete object;
     CloseWindow();
     return 0;
 }
