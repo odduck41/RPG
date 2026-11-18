@@ -149,7 +149,7 @@ namespace RPG {
         };
 
         std::unordered_set<std::string> file_paths_{};
-        std::map<std::string, FileInfo_> file_info_{};
-        std::map<std::string, AnimationInfo_> animation_info_{};
+        std::unordered_map<std::string, FileInfo_> file_info_{};
+        std::unordered_map<std::string, AnimationInfo_> animation_info_{};
     };
 }
