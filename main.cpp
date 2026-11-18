@@ -5,7 +5,7 @@
 #include <sstream>
 
 #include "raylib.h"
-#include "RPG_objects/Sprite.hpp"
+#include "RPG_objects/Textures.hpp"
 
 #define screenWidth 800
 #define screenHeight 450
