@@ -178,7 +178,7 @@ namespace RPG {
         }
 
         void update() override {
-            if (static_cast<double>(frameCounter_) * animation_info_[current_animation_].animation.frameSpeed < GetFPS())
+            if (static_cast<double>(++frameCounter_) * animation_info_[current_animation_].animation.frameSpeed < GetFPS())
                 return;
 
             frameCounter_ = 0;
@@ -210,7 +210,6 @@ namespace RPG {
             DrawTexturePro(file_info_[file].texture, source_rect, dest_rect,
                             Vector2{.x = 0, .y = 0}, rotation_, WHITE);
 
-            ++frameCounter_;
         }
 
     private:
