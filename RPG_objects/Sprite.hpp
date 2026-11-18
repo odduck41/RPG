@@ -1,7 +1,5 @@
 #pragma once
 
-#include <begin_code.h>
-
 #include "Textures.hpp"
 
 namespace RPG {
@@ -17,6 +15,15 @@ namespace RPG {
 
         explicit Sprite(Rectangle texture_rect, Vector2 pos)
             : position_(std::move(pos)), source_rectangle_(std::move(texture_rect)) {}
+
+        template<class T = std::map<std::string, Texture2D>> requires TexturesStorageType<T>
+        explicit Sprite(const MultipleFileTexture<T>& texture) {
+            texture_data_ = new MultipleFileTexture<T>(texture);
+        }
+
+        explicit Sprite(const SoloFileTexture& texture) {
+            texture_data_ = new SoloFileTexture(texture);
+        }
 
         FORCE_INLINE void show() {visible_ = true;}
         FORCE_INLINE void hide() {visible_ = false;}
@@ -45,15 +52,19 @@ namespace RPG {
 
         FORCE_INLINE virtual void update() = 0;
         FORCE_INLINE virtual void draw() = 0;
-        FORCE_INLINE virtual ~Sprite() = default;
+        FORCE_INLINE virtual ~Sprite() {
+            delete texture_data_;
+        };
     protected:
-        bool visible_{true};
         Vector2 position_{};
-        Vector2 scaling_{.x = 1., .y = 1.};
-        double rotation_{0};
+        Vector2 scaling_{.x = 1.f, .y = 1.f};
+        float rotation_{0.f};
+        bool visible_{true};
         TextureData* texture_data_{};
         Rectangle source_rectangle_{};
     };
 
+    class AnimatableSprite {
 
+    };
 }
