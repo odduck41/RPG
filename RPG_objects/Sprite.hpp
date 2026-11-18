@@ -13,8 +13,8 @@ namespace RPG {
 
     struct File {
         std::string path{};
-        unsigned int width{};
-        unsigned int height{};
+        unsigned int sheet_width{};
+        unsigned int sheet_height{};
     };
 
     struct TextureAnimation {
@@ -45,7 +45,7 @@ namespace RPG {
             return scaling_;
         }
 
-        void setRotation(const double& rotation) {
+        void setRotation(const float& rotation) {
             rotation_ = rotation;
         }
 
@@ -54,7 +54,7 @@ namespace RPG {
         }
 
         virtual void addFile(const std::string&, const File&) = 0;
-        virtual void addFile(const File&, const std::string& = "") = 0;
+        virtual void addFile(const File&) = 0;
         virtual void update() = 0;
         virtual void draw() = 0;
         virtual ~Sprite() = default;
@@ -69,7 +69,7 @@ namespace RPG {
     public:
         AnimatableSprite() = default;
 
-        virtual void addFile(const std::string& file_alias, const File& file) override {
+        void addFile(const std::string& file_alias, const File& file) final {
             if (file_paths_.contains(file.path)) return;
             if (file_info_.contains(file_alias))
                 throw std::runtime_error("Trying to write 2 different files with one alias");
@@ -79,25 +79,27 @@ namespace RPG {
             file_info_[file_alias].file = file;
             file_info_[file_alias].texture = LoadTexture(file.path.c_str());
 
-            assert(file_info_[file_alias].texture.width % file.width == 0 && "File width should divide sprite width!");
-            assert(file_info_[file_alias].texture.height % file.height == 0 && "File height should divide sprite height!");
+            assert(file_info_[file_alias].texture.width % file.sheet_width == 0 && "File width should divide sprite width!");
+            assert(file_info_[file_alias].texture.height % file.sheet_height == 0 && "File height should divide sprite height!");
 
-            file_info_[file_alias].free_sheets.resize(file_info_[file_alias].texture.height / file.height, false);
+            file_info_[file_alias].free_sheets.resize(file_info_[file_alias].texture.height / file.sheet_height, false);
         }
 
-        virtual void addFile(const File& file, const std::string& file_alias = "") override {
-            if (file_alias == "") throw std::runtime_error("Empty file_alias for animation!");
-
-            AnimatableSprite::addFile(file_alias, file);
+        void addFile(const File&) final {
+            throw std::runtime_error("Empty file_alias for animation!");
         }
+
+        virtual void update() {}
+        virtual void draw() {}
 
     private:
         std::unordered_set<std::string> file_paths_{};
-        struct FileInfo {
-            File file;
-            Texture2D texture;
+        struct FileInfo_ {
+            File file{};
+            Texture2D texture{};
             std::vector<bool> free_sheets{};
+            int current_sheet{};
         };
-        std::map<std::string, FileInfo> file_info_{};
+        std::map<std::string, FileInfo_> file_info_{};
     };
 }
