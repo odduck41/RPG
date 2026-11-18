@@ -1,5 +1,7 @@
 #pragma once
 
+#include <begin_code.h>
+
 #include "Textures.hpp"
 
 namespace RPG {
@@ -7,40 +9,51 @@ namespace RPG {
     class Sprite {
     public:
         Sprite() = default;
-        explicit Sprite(const Vector2& pos) : position_(pos) {}
-        void show() {visible_ = true;}
-        void hide() {visible_ = false;}
+        explicit Sprite(Rectangle texture_rect)
+            : source_rectangle_(std::move(texture_rect)) {}
 
-        void setPosition(const Vector2& pos) {
+        explicit Sprite(Vector2 pos)
+            : position_(std::move(pos)) {}
+
+        explicit Sprite(Rectangle texture_rect, Vector2 pos)
+            : position_(std::move(pos)), source_rectangle_(std::move(texture_rect)) {}
+
+        FORCE_INLINE void show() {visible_ = true;}
+        FORCE_INLINE void hide() {visible_ = false;}
+
+        FORCE_INLINE void setPosition(const Vector2& pos) {
             position_ = pos;
         }
-        [[nodiscard]] const Vector2& getPosition() const {
+        [[nodiscard]] FORCE_INLINE const Vector2& getPosition() const {
             return position_;
         }
 
-        void setScaling(const Vector2& scaling) {
+        FORCE_INLINE void setScaling(const Vector2& scaling) {
             scaling_ = scaling;
         }
-        [[nodiscard]] const Vector2& getScaling() const {
+        [[nodiscard]] FORCE_INLINE const Vector2& getScaling() const {
             return scaling_;
         }
 
-        void setRotation(const double& rotation) {
+        FORCE_INLINE void setRotation(const double& rotation) {
             rotation_ = rotation;
         }
-        [[nodiscard]] const double& getRotation() const {
+        [[nodiscard]] FORCE_INLINE const double& getRotation() const {
             return rotation_;
         }
 
 
-        virtual void update() = 0;
-        virtual void draw() = 0;
-        virtual ~Sprite() = default;
+        FORCE_INLINE virtual void update() = 0;
+        FORCE_INLINE virtual void draw() = 0;
+        FORCE_INLINE virtual ~Sprite() = default;
     protected:
         bool visible_{true};
         Vector2 position_{};
         Vector2 scaling_{.x = 1., .y = 1.};
         double rotation_{0};
         TextureData* texture_data_{};
+        Rectangle source_rectangle_{};
     };
+
+
 }

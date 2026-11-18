@@ -8,7 +8,7 @@
 
 #include "raylib.h"
 
-#define FORCE_INLINE __attribute__((__always_inline__)) inline
+#define FORCE_INLINE __attribute__((__always_inline__)) __inline__
 
 namespace RPG {
 
