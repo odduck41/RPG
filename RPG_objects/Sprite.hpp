@@ -2,10 +2,9 @@
 
 #include <cassert>
 #include <functional>
-#include <map>
-#include <set>
 #include <vector>
 #include <string>
+#include <unordered_map>
 #include <unordered_set>
 
 #include "raylib.h"
@@ -117,6 +116,10 @@ namespace RPG {
                 .callback = callback,
                 .sheet = index
             };
+
+            if (current_animation_.empty()) {
+                current_animation_ = animation_alias;
+            }
         }
 
         void addAnimation(const std::string& animation_alias,
@@ -128,14 +131,49 @@ namespace RPG {
         }
 
         virtual void update() {
+            if (static_cast<double>(frameCounter_) * animation_info_[current_animation_].animation.frameSpeed < GetFPS())
+                return;
 
+            frameCounter_ = 0;
+            ++currentFrame;
+            currentFrame %= animation_info_[current_animation_].animation.frameAmount;
+
+            animation_info_[current_animation_].callback();
         }
 
-        virtual void draw() {
+        void draw() override {
+            if (!visible_) return;
+            const auto file = animation_info_[current_animation_].file_alias;
 
+            const Rectangle dest_rect = {
+                .x = position_.x, .y = position_.y,
+                .width = (scaling_.x * static_cast<float>(file_info_[file].file.sheet_width)),
+                .height = (scaling_.y * static_cast<float>(file_info_[file].file.sheet_height))
+            };
+
+
+            auto source_rect = Rectangle{
+                .x = static_cast<float>(currentFrame * file_info_[file].file.sheet_width),
+                .y = static_cast<float>(animation_info_[current_animation_].sheet * file_info_[file].file.sheet_height),
+                .width = static_cast<float>(file_info_[file].file.sheet_width) * scaling_.y / fabs(scaling_.y),
+                .height = static_cast<float>(file_info_[file].file.sheet_height) * scaling_.x / fabs(scaling_.x)
+            };
+
+            source_rect.height *= scaling_.x / fabs(scaling_.x);
+            source_rect.width *= scaling_.y / fabs(scaling_.y);
+
+            DrawTexturePro(file_info_[file].texture, source_rect, dest_rect,
+                            Vector2{.x = 0, .y = 0}, rotation_, WHITE);
+
+            ++frameCounter_;
         }
 
     private:
+
+        std::size_t frameCounter_{};
+        std::string current_animation_{};
+        unsigned int currentFrame{};
+
         struct FileInfo_ {
             File file{};
             Texture2D texture{};
