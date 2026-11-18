@@ -12,6 +12,10 @@
 
 int main() {
     // InitWindow(screenWidth, screenHeight, "Sprites");
+    std::vector<RPG::TextureData*> objects;
+    objects.push_back(new RPG::SoloFileTexture());
+    objects.push_back(new RPG::MultipleFileTexture<>());
+    objects.push_back(new RPG::MultipleFileTexture<std::vector<Texture2D>>());
 
     // CloseWindow();
     return 0;
