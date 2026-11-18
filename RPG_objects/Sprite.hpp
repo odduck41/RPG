@@ -157,12 +157,12 @@ namespace RPG {
         }
 
 
-        bool isFinished() {
+        bool canInterrupt() {
             return !animation_info_[current_animation_].animation.asksFinishing || finished;
         }
 
         void switchAnimation(const std::string& animation_alias) {
-            if (!isFinished()) return;
+            if (!canInterrupt()) return;
             if (animation_alias == current_animation_) return;
             current_animation_ = animation_alias;
             frameCounter_ = 0;
@@ -178,7 +178,7 @@ namespace RPG {
         }
 
         void update() override {
-            if (static_cast<double>(++frameCounter_) * animation_info_[current_animation_].animation.frameSpeed < GetFPS())
+            if (static_cast<double>(++frameCounter_) * animation_info_[current_animation_].animation.frameSpeed < 60)
                 return;
 
             frameCounter_ = 0;

@@ -14,43 +14,148 @@
 int main() {
     InitWindow(screenWidth, screenHeight, "Sprites");
     const auto sprite = new RPG::AnimatableSprite();
-    sprite->addFile("Soldier", {
-        .path = "/Users/leo/programming/RPG/assets/FreeCharactersAnimationsAssetPack/SpriteSheets(96x96)/Human_Soldier_Sword_Shield/With_Shadows/Human_Soldier_Sword_Shield-Sheet.png",
-        .sheet_width = 960 / 10, .sheet_height = 768 / 8
-    });
     sprite->setScaling({1. * K, 1. * K});
-    sprite->addAnimation("Idle", RPG::TextureAnimation(6, true));
+    sprite->addFile("Idle", {
+                        .path = "../assets/Sunnyside_World_ARCHIVED_ASSETS/SUNNYSIDE_WORLD_CHARACTERS_PARTS_V0.3.1/IDLE/base_idle_strip9.png",
+                        .sheet_width = 96, .sheet_height = 64
+                    });
+    sprite->addAnimation("Idle", RPG::TextureAnimation(9, true));
+    sprite->addFile("Walk", {
+                        .path = "../assets/Sunnyside_World_ARCHIVED_ASSETS/SUNNYSIDE_WORLD_CHARACTERS_PARTS_V0.3.1/WALKING/base_walk_strip8.png",
+                        .sheet_width = 96, .sheet_height = 64
+                    });
+    // sprite->addAnimation("Walk", "Walk", RPG::TextureAnimation(8, true));
+
+    auto hear = new RPG::AnimatableSprite();
+    hear->setScaling({1. * K, 1. * K});
+    hear->addFile("Idle", {
+                      .path = "../assets/Sunnyside_World_ARCHIVED_ASSETS/SUNNYSIDE_WORLD_CHARACTERS_PARTS_V0.3.1/IDLE/spikeyhair_idle_strip9.png",
+                      .sheet_width = 96, .sheet_height = 64
+                  });
+    hear->addAnimation("Idle", RPG::TextureAnimation(9, true));
+    hear->addFile("Walk", {
+                  .path = "../assets/Sunnyside_World_ARCHIVED_ASSETS/SUNNYSIDE_WORLD_CHARACTERS_PARTS_V0.3.1/WALKING/spikeyhair_walk_strip8.png",
+                  .sheet_width = 96, .sheet_height = 64
+              });
+
+
+    // hear->addAnimation("Walk", "Walk", RPG::TextureAnimation(8, true));
+
+    auto hand = new RPG::AnimatableSprite();
+    hand->setScaling({1. * K, 1. * K});
+    hand->addFile("Idle", {
+                      .path = "../assets/Sunnyside_World_ARCHIVED_ASSETS/SUNNYSIDE_WORLD_CHARACTERS_PARTS_V0.3.1/IDLE/tools_idle_strip9.png",
+                      .sheet_width = 96, .sheet_height = 64
+                  });
+    hand->addAnimation("Idle", RPG::TextureAnimation(9, true));
+    hand->addFile("Walk", {
+                      .path = "../assets/Sunnyside_World_ARCHIVED_ASSETS/SUNNYSIDE_WORLD_CHARACTERS_PARTS_V0.3.1/WALKING/tools_walk_strip8.png",
+                      .sheet_width = 96, .sheet_height = 64
+                  });
+    // hand->addAnimation("Walk", "Walk", RPG::TextureAnimation(8, true));
 
     Vector2 how_to = {.x = 0., .y = 0.};
-    sprite->addAnimation("Walk", RPG::TextureAnimation(8, true), [&]() {
+    sprite->addAnimation("Walk", "Walk", RPG::TextureAnimation(8, true), [&]() {
         auto pos = sprite->getPosition();
         pos.x += how_to.x * K * 2;
         pos.y += how_to.y * K * 2;
         sprite->setPosition(pos);
     });
 
-    sprite->addAnimation("Jump", RPG::TextureAnimation(6, false, true));
+    hand->addAnimation("Walk", "Walk", RPG::TextureAnimation(8, true), [&]() {
+        auto pos = hand->getPosition();
+        pos.x += how_to.x * K * 2;
+        pos.y += how_to.y * K * 2;
+        hand->setPosition(pos);
+    });
+    hear->addAnimation("Walk", "Walk", RPG::TextureAnimation(8, true), [&]() {
+        auto pos = hear->getPosition();
+        pos.x += how_to.x * K * 2;
+        pos.y += how_to.y * K * 2;
+        hear->setPosition(pos);
+    });
+
+
+    hear->addFile("Jump", {
+                      .path = "../assets/Sunnyside_World_ARCHIVED_ASSETS/SUNNYSIDE_WORLD_CHARACTERS_PARTS_V0.3.1/JUMP/spikeyhair_jump_strip9.png",
+                      .sheet_width = 96, .sheet_height = 64
+                  });
+    sprite->addFile("Jump", {
+                        .path = "../assets/Sunnyside_World_ARCHIVED_ASSETS/SUNNYSIDE_WORLD_CHARACTERS_PARTS_V0.3.1/JUMP/base_jump_strip9.png",
+                        .sheet_width = 96, .sheet_height = 64
+                    });
+    hand->addFile("Jump", {
+      .path = "../assets/Sunnyside_World_ARCHIVED_ASSETS/SUNNYSIDE_WORLD_CHARACTERS_PARTS_V0.3.1/JUMP/tools_jump_strip9.png",
+      .sheet_width = 96, .sheet_height = 64
+  });
+    sprite->addAnimation("Jump", "Jump", RPG::TextureAnimation(9, false, true));
+    hear->addAnimation("Jump", "Jump", RPG::TextureAnimation(9, false, true));
+    hand->addAnimation("Jump", "Jump", RPG::TextureAnimation(9, false, true));
+
+
+    hear->addFile("Attack", {
+                      .path = "../assets/Sunnyside_World_ARCHIVED_ASSETS/SUNNYSIDE_WORLD_CHARACTERS_PARTS_V0.3.1/ATTACK/spikeyhair_attack_strip10.png",
+                      .sheet_width = 96, .sheet_height = 64
+                  });
+    sprite->addFile("Attack", {
+                        .path = "../assets/Sunnyside_World_ARCHIVED_ASSETS/SUNNYSIDE_WORLD_CHARACTERS_PARTS_V0.3.1/ATTACK/base_attack_strip10.png",
+                        .sheet_width = 96, .sheet_height = 64
+                    });
+    hand->addFile("Attack", {
+      .path = "../assets/Sunnyside_World_ARCHIVED_ASSETS/SUNNYSIDE_WORLD_CHARACTERS_PARTS_V0.3.1/ATTACK/tools_attack_strip10.png",
+      .sheet_width = 96, .sheet_height = 64
+    });
+    sprite->addAnimation("Attack", "Attack", RPG::TextureAnimation(10, false, true), [&]() {
+        SetGamepadVibration(0, 0.1, 0.1, 0.1);
+    });
+    hear->addAnimation("Attack", "Attack", RPG::TextureAnimation(10, false, true));
+    hand->addAnimation("Attack", "Attack", RPG::TextureAnimation(10, false, true));
 
     SetTargetFPS(60);
-
+#define gamepad 0
     while (!WindowShouldClose()) {
         sprite->update();
-        if (IsKeyDown(KEY_SPACE)) {
+        hear->update();
+        hand->update();
+        if (IsKeyDown(KEY_SPACE) || IsGamepadButtonDown(0, 7)) {
             sprite->switchAnimation("Jump");
-        } else if ((IsKeyDown(KEY_W) || IsKeyDown(KEY_A) || IsKeyDown(KEY_S) || IsKeyDown(KEY_D))) {
-            how_to = {(float)IsKeyDown(KEY_D) - IsKeyDown(KEY_A), (float)IsKeyDown(KEY_S) - IsKeyDown(KEY_W)};
+            hear->switchAnimation("Jump");
+            hand->switchAnimation("Jump");
+        } else if (IsKeyDown(KEY_E) || IsGamepadButtonDown(0, 6)) {
+            sprite->switchAnimation("Attack");
+            hear->switchAnimation("Attack");
+            hand->switchAnimation("Attack");
+        } else if ((IsKeyDown(KEY_W) || IsKeyDown(KEY_A) || IsKeyDown(KEY_S) || IsKeyDown(KEY_D)) || (fabs(GetGamepadAxisMovement(gamepad, GAMEPAD_AXIS_LEFT_X)) > 0.15
+            ||
+             fabs(GetGamepadAxisMovement(gamepad, GAMEPAD_AXIS_LEFT_Y)) > 0.15)) {
+            how_to = {(float) IsKeyDown(KEY_D) - IsKeyDown(KEY_A) + GetGamepadAxisMovement(gamepad, GAMEPAD_AXIS_LEFT_X), (float) IsKeyDown(KEY_S) - IsKeyDown(KEY_W) + GetGamepadAxisMovement(gamepad, GAMEPAD_AXIS_LEFT_Y)};
             if (IsKeyDown(KEY_A)) {
+                hear->setScaling({1 * K, -1. * K});
                 sprite->setScaling({1 * K, -1. * K});
+                hand->setScaling({1 * K, -1. * K});
             } else if (IsKeyDown(KEY_D)) {
+                hear->setScaling({1. * K, 1. * K});
                 sprite->setScaling({1. * K, 1. * K});
+                hand->setScaling({1. * K, 1. * K});
+            } else {
+                hear->setScaling({1. * K, 1.f * K * GetGamepadAxisMovement(gamepad, GAMEPAD_AXIS_LEFT_X) / fabs(GetGamepadAxisMovement(gamepad, GAMEPAD_AXIS_LEFT_X))});
+                sprite->setScaling({1. * K, 1.f * K *  GetGamepadAxisMovement(gamepad, GAMEPAD_AXIS_LEFT_X) / fabs(GetGamepadAxisMovement(gamepad, GAMEPAD_AXIS_LEFT_X))});
+                hand->setScaling({1. * K, 1.f * K *  GetGamepadAxisMovement(gamepad, GAMEPAD_AXIS_LEFT_X) / fabs(GetGamepadAxisMovement(gamepad, GAMEPAD_AXIS_LEFT_X))});
             }
+
             sprite->switchAnimation("Walk");
+            hear->switchAnimation("Walk");
+            hand->switchAnimation("Walk");
         } else {
             sprite->switchAnimation("Idle");
+            hear->switchAnimation("Idle");
+            hand->switchAnimation("Idle");
         }
         BeginDrawing();
             ClearBackground(BROWN);
             sprite->draw();
+            hear->draw();
+            hand->draw();
         EndDrawing();
     }
     CloseWindow();
