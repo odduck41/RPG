@@ -137,7 +137,7 @@ int main() {
                 hear->setScaling({1. * K, 1. * K});
                 sprite->setScaling({1. * K, 1. * K});
                 hand->setScaling({1. * K, 1. * K});
-            } else {
+            } else if ((fabs(GetGamepadAxisMovement(gamepad, GAMEPAD_AXIS_LEFT_X)) > 0.15)) {
                 hear->setScaling({1. * K, 1.f * K * GetGamepadAxisMovement(gamepad, GAMEPAD_AXIS_LEFT_X) / fabs(GetGamepadAxisMovement(gamepad, GAMEPAD_AXIS_LEFT_X))});
                 sprite->setScaling({1. * K, 1.f * K *  GetGamepadAxisMovement(gamepad, GAMEPAD_AXIS_LEFT_X) / fabs(GetGamepadAxisMovement(gamepad, GAMEPAD_AXIS_LEFT_X))});
                 hand->setScaling({1. * K, 1.f * K *  GetGamepadAxisMovement(gamepad, GAMEPAD_AXIS_LEFT_X) / fabs(GetGamepadAxisMovement(gamepad, GAMEPAD_AXIS_LEFT_X))});
