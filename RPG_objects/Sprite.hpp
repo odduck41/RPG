@@ -6,6 +6,7 @@
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
+#include <chrono>
 
 #include "raylib.h"
 
@@ -23,7 +24,7 @@ namespace RPG {
             : frameAmount(fA), frameSpeed(fS), cycled(c), asksFinishing(aF) {}
 
         explicit TextureAnimation(const unsigned int& fA, const bool& c = true, const bool& aF = false)
-            : frameAmount(fA), cycled(c), asksFinishing(aF) {frameSpeed = 1.5 * fA;}
+            : frameAmount(fA), cycled(c), asksFinishing(aF) {frameSpeed = 28;}
 
         unsigned int frameAmount{};
         double frameSpeed{};
@@ -165,28 +166,31 @@ namespace RPG {
             if (!canInterrupt()) return;
             if (animation_alias == current_animation_) return;
             current_animation_ = animation_alias;
-            frameCounter_ = 0;
+            // frameCounter_ = 0;
             currentFrame = 0;
             finished = false;
         }
 
         void switchAnimationForce(const std::string& animation_alias) {
             current_animation_ = animation_alias;
-            frameCounter_ = 0;
             currentFrame = 0;
             finished = false;
         }
 
         void update() override {
-            if (static_cast<double>(++frameCounter_) * animation_info_[current_animation_].animation.frameSpeed < 60)
-                return;
+            const auto timer = std::chrono::steady_clock::now();
+            const std::size_t elapsed =
+                std::chrono::duration_cast<std::chrono::milliseconds>(timer - last_frame).count();
 
-            frameCounter_ = 0;
-            ++currentFrame;
-            currentFrame %= animation_info_[current_animation_].animation.frameAmount;
-            if (currentFrame == 0) finished = true;
-
-            animation_info_[current_animation_].callback();
+            if (static_cast<double>(elapsed) * animation_info_[current_animation_].animation.frameSpeed >= 1000) {
+                if (currentFrame == 0) {
+                    animation_info_[current_animation_].callback();
+                }
+                ++currentFrame;
+                currentFrame %= animation_info_[current_animation_].animation.frameAmount;
+                if (currentFrame == 0) finished = true;
+                last_frame = timer;
+            }
         }
 
         void draw() override {
@@ -213,8 +217,7 @@ namespace RPG {
         }
 
     private:
-
-        std::size_t frameCounter_{};
+        std::chrono::time_point<std::chrono::steady_clock> last_frame{};
         std::string current_animation_{};
         unsigned int currentFrame{};
         bool finished{false};

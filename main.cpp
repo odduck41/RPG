@@ -1,8 +1,10 @@
+#include <fstream>
 #include <iostream>
 #include <vector>
 
 #include <string>
 #include <sstream>
+#include <nlohmann/json.hpp>
 
 #include "raylib.h"
 #include "RPG_objects/Sprite.hpp"
@@ -105,18 +107,32 @@ int main() {
       .path = "../assets/Sunnyside_World_ARCHIVED_ASSETS/SUNNYSIDE_WORLD_CHARACTERS_PARTS_V0.3.1/ATTACK/tools_attack_strip10.png",
       .sheet_width = 96, .sheet_height = 64
     });
+    InitAudioDevice();
+    const auto sound = LoadSound("../assets/sounds/568170__merrick079__sword-sound-1_16bit.wav");
     sprite->addAnimation("Attack", "Attack", RPG::TextureAnimation(10, false, true), [&]() {
-        SetGamepadVibration(0, 0.1, 0.1, 0.1);
+        SetGamepadVibration(0, 0.6, 0.6, 0.1);
+        PlaySound(sound);
     });
     hear->addAnimation("Attack", "Attack", RPG::TextureAnimation(10, false, true));
     hand->addAnimation("Attack", "Attack", RPG::TextureAnimation(10, false, true));
 
-    SetTargetFPS(60);
+    int fps = 60;
+    SetTargetFPS(fps);
 #define gamepad 0
+    auto last = std::chrono::steady_clock::now();
+    int FPS = 0, counter = 0;
     while (!WindowShouldClose()) {
+
         sprite->update();
         hear->update();
         hand->update();
+        if (IsKeyDown(KEY_K)) {
+            --fps;
+            SetTargetFPS(fps);
+        } else if (IsKeyDown(KEY_I)) {
+            ++fps;
+            SetTargetFPS(fps);
+        }
         if (IsKeyDown(KEY_SPACE) || IsGamepadButtonDown(0, 7)) {
             sprite->switchAnimation("Jump");
             hear->switchAnimation("Jump");
@@ -156,7 +172,15 @@ int main() {
             sprite->draw();
             hear->draw();
             hand->draw();
+            const auto timer = std::chrono::steady_clock::now();
+            if (std::chrono::duration_cast<std::chrono::seconds>(timer - last).count() == 1) {
+                FPS = counter;
+                counter = 0;
+                last = timer;
+            }
+            DrawText(std::format("FPS is {} \nActual FPS is {}", fps, FPS).c_str(), 0, 0, 10, WHITE);
         EndDrawing();
+        ++counter;
     }
     CloseWindow();
     return 0;

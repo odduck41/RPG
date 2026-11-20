@@ -1,3 +1,9 @@
 {
-  "_":
+  "_": "PlayerIdle",
+  "W": "PlayerWalk",
+  "A": "PlayerWalk",
+  "S": "PlayerWalk",
+  "D": "PlayerWalk",
+  "Space": "PlayerJump",
+  "E": "PlayerAttack"
 }
