@@ -1,239 +1,75 @@
 #pragma once
 
-#include <cassert>
-#include <functional>
-#include <vector>
-#include <string>
-#include <unordered_map>
-#include <unordered_set>
-#include <chrono>
+#include <raylib.h>
+#include <type_traits>
 
-#include "raylib.h"
+
+namespace VectorOperations {
+    template<class T>
+    concept VectorType = std::is_same_v<Vector2, std::remove_cvref_t<T>> or
+                         std::is_same_v<Vector3, std::remove_cvref_t<T>> or
+                         std::is_same_v<Vector4, std::remove_cvref_t<T>>;
+
+    template<VectorType Vector>
+    inline Vector& operator+=(Vector& a, const Vector& b) noexcept {
+        a = Vector{
+            .x = a.x + b.x, .y = a.y + b.y
+        };
+        if constexpr (requires {a.z;}) a.z += b.z;
+        if constexpr (requires {a.w;}) a.w += b.w;
+        return a;
+    }
+
+    template<VectorType Vector>
+    inline Vector operator+(Vector a, const Vector& b) noexcept {
+        return a += b;
+    }
+
+    template<VectorType Vector>
+    inline Vector& operator-=(Vector& a, const Vector& b) noexcept {
+        a = Vector{
+            .x = a.x - b.x, .y = a.y - b.y
+        };
+        if constexpr (requires {a.z;}) a.z -= b.z;
+        if constexpr (requires {a.w;}) a.w -= b.w;
+        return a;
+    }
+
+    template<VectorType Vector>
+    inline Vector operator-(Vector a, const Vector& b) noexcept {
+        return a -= b;
+    }
+
+    template<VectorType Vector, std::integral T>
+    inline Vector& operator*=(Vector& a, T b) {
+        a.x *= static_cast<float>(b);
+        a.y *= static_cast<float>(b);
+        if constexpr (requires {a.z;}) a.z *= static_cast<float>(b);
+        if constexpr (requires {a.w;}) a.w *= static_cast<float>(b);
+        return a;
+    }
+
+    template<VectorType Vector, std::integral T>
+    inline Vector operator*(Vector a, T b) {
+        return a *= b;
+    }
+
+    template<class Vector, class T> requires VectorType<Vector> and std::is_integral_v<T>
+    inline Vector& operator/=(Vector& a, T b) {
+        a.x /= static_cast<float>(b);
+        a.y /= static_cast<float>(b);
+        if constexpr (requires {a.z;}) a.z /= static_cast<float>(b);
+        if constexpr (requires {a.w;}) a.w /= static_cast<float>(b);
+        return a;
+    }
+
+    template<class Vector, class T> requires VectorType<Vector> and std::is_integral_v<T>
+    inline Vector operator/(Vector a, T b) {
+        return a /= b;
+    }
+}
 
 namespace RPG {
+    using namespace VectorOperations;
 
-    struct File {
-        std::string path{};
-        unsigned int sheet_width{};
-        unsigned int sheet_height{};
-    };
-
-    struct TextureAnimation {
-        TextureAnimation() = default;
-        TextureAnimation(const unsigned int& fA, const double& fS, const bool& c, const bool& aF)
-            : frameAmount(fA), frameSpeed(fS), cycled(c), asksFinishing(aF) {}
-
-        explicit TextureAnimation(const unsigned int& fA, const bool& c = true, const bool& aF = false)
-            : frameAmount(fA), cycled(c), asksFinishing(aF) {frameSpeed = 28;}
-
-        unsigned int frameAmount{};
-        double frameSpeed{};
-        bool cycled{false};
-        bool asksFinishing{false};
-    };
-
-    class Sprite {
-    public:
-        Sprite() = default;
-        explicit Sprite(const Vector2& pos) : position_(pos) {}
-        void show() {visible_ = true;}
-        void hide() {visible_ = false;}
-
-        void setPosition(const Vector2& pos) {
-            position_ = pos;
-        }
-        [[nodiscard]] const Vector2& getPosition() const {
-            return position_;
-        }
-
-        void setScaling(const Vector2& scaling) {
-            scaling_ = scaling;
-        }
-        [[nodiscard]] const Vector2& getScaling() const {
-            return scaling_;
-        }
-
-        void setRotation(const float& rotation) {
-            rotation_ = rotation;
-        }
-
-        [[nodiscard]] const float& getRotation() const {
-            return rotation_;
-        }
-
-        virtual void addFile(const std::string&, const File&) = 0;
-        virtual void addFile(const File&) = 0;
-        virtual void update() = 0;
-        virtual void draw() = 0;
-        virtual ~Sprite() = default;
-    protected:
-        Vector2 position_{};
-        Vector2 scaling_{.x = 1.f, .y = 1.f};
-        float rotation_{0.f};
-        bool visible_{true};
-    };
-
-    class AnimatableSprite : public Sprite {
-    public:
-        AnimatableSprite() = default;
-
-        void addFile(const std::string& file_alias, const File& file) final {
-            if (file_paths_.contains(file.path)) return;
-            if (file_info_.contains(file_alias))
-                throw std::runtime_error("Trying to write 2 different files with one alias");
-
-            file_paths_.insert(file.path);
-
-            file_info_[file_alias].file = file;
-            file_info_[file_alias].texture = LoadTexture(file.path.c_str());
-
-            assert(file_info_[file_alias].texture.width % file.sheet_width == 0 && "File width should divide sprite width!");
-            assert(file_info_[file_alias].texture.height % file.sheet_height == 0 && "File height should divide sprite height!");
-
-            file_info_[file_alias].free_sheets.resize(file_info_[file_alias].texture.height / file.sheet_height, false);
-        }
-
-        void addFile(const File&) final {
-            throw std::runtime_error("Empty file_alias for animation!");
-        }
-
-        void removeFile(const std::string& file_alias) {
-            if (!file_info_.contains(file_alias)) return;
-            bool hanged = false;
-            for (std::size_t i = 0; !hanged && i < file_info_[file_alias].free_sheets.size(); ++i) {
-                hanged |= file_info_[file_alias].free_sheets[i];
-            }
-
-            if (hanged) throw std::runtime_error("Trying to unload file with animations related on it!");
-
-            file_paths_.erase(file_info_[file_alias].file.path);
-
-            UnloadTexture(file_info_[file_alias].texture);
-
-            file_info_.erase(file_alias);
-        }
-
-
-        void addAnimation(const std::string& animation_alias, const std::string& file_alias,
-            const TextureAnimation& animation, const std::function<void()>& callback = [](){}) {
-            if (animation_info_.contains(animation_alias))
-                throw std::runtime_error("Trying to write 2 different animations with one alias");
-
-            unsigned int index = 0;
-            for (; index < file_info_[file_alias].free_sheets.size() &&
-                           file_info_[file_alias].free_sheets[index]; ++index) {}
-
-            if (index == file_info_[file_alias].free_sheets.size())
-                throw std::runtime_error("Trying to hang animation up to full file");
-
-            file_info_[file_alias].free_sheets[index] = true;
-
-            animation_info_[animation_alias] = {
-                .file_alias = file_alias,
-                .animation = animation,
-                .callback = callback,
-                .sheet = index
-            };
-
-            if (current_animation_.empty()) {
-                current_animation_ = animation_alias;
-            }
-        }
-
-        void addAnimation(const std::string& animation_alias,
-            const TextureAnimation& animation, const std::function<void()>& callback = [](){}) {
-            if (file_paths_.size() > 1) throw std::runtime_error("You are trying to hang animation up to all files.");
-            if (file_info_.empty()) throw std::runtime_error("You are trying to hang animation up... Nowhere");
-
-            addAnimation(animation_alias, file_info_.begin()->first, animation, callback);
-        }
-
-        void removeAnimation(const std::string& animation_alias) {
-            if (animation_alias == current_animation_) throw std::runtime_error("NONONO, U'RE TRYING TO DO SOME SHIT");
-
-            const auto file = animation_info_[animation_alias].file_alias;
-            file_info_[file].free_sheets[animation_info_[animation_alias].sheet] = false;
-
-            animation_info_.erase(animation_alias);
-        }
-
-
-        bool canInterrupt() {
-            return !animation_info_[current_animation_].animation.asksFinishing || finished;
-        }
-
-        void switchAnimation(const std::string& animation_alias) {
-            if (!canInterrupt()) return;
-            if (animation_alias == current_animation_) return;
-            current_animation_ = animation_alias;
-            // frameCounter_ = 0;
-            currentFrame = 0;
-            finished = false;
-        }
-
-        void switchAnimationForce(const std::string& animation_alias) {
-            current_animation_ = animation_alias;
-            currentFrame = 0;
-            finished = false;
-        }
-
-        void update() override {
-            const auto timer = std::chrono::steady_clock::now();
-            const std::size_t elapsed =
-                std::chrono::duration_cast<std::chrono::milliseconds>(timer - last_frame).count();
-
-            if (static_cast<double>(elapsed) * animation_info_[current_animation_].animation.frameSpeed >= 1000) {
-                animation_info_[current_animation_].callback();
-                ++currentFrame;
-                currentFrame %= animation_info_[current_animation_].animation.frameAmount;
-                if (currentFrame == 0) finished = true;
-                last_frame = timer;
-            }
-        }
-
-        void draw() override {
-            if (!visible_) return;
-            const auto file = animation_info_[current_animation_].file_alias;
-
-            const auto dest_rect = Rectangle{
-                .x = position_.x, .y = position_.y,
-                .width = (scaling_.x * static_cast<float>(file_info_[file].file.sheet_width)),
-                .height = (scaling_.y * static_cast<float>(file_info_[file].file.sheet_height))
-            };
-
-
-            const auto source_rect = Rectangle{
-                .x = static_cast<float>(currentFrame * file_info_[file].file.sheet_width),
-                .y = static_cast<float>(animation_info_[current_animation_].sheet * file_info_[file].file.sheet_height),
-                .width = static_cast<float>(file_info_[file].file.sheet_width) * scaling_.y / fabs(scaling_.y),
-                .height = static_cast<float>(file_info_[file].file.sheet_height) * scaling_.x / fabs(scaling_.x)
-            };
-
-            DrawTexturePro(file_info_[file].texture, source_rect, dest_rect,
-                            Vector2{.x = 0, .y = 0}, rotation_, WHITE);
-
-        }
-
-    private:
-        std::chrono::time_point<std::chrono::steady_clock> last_frame{};
-        std::string current_animation_{};
-        unsigned int currentFrame{};
-        bool finished{false};
-
-        struct FileInfo_ {
-            File file{};
-            Texture2D texture{};
-            std::vector<bool> free_sheets{};
-        };
-        struct AnimationInfo_ {
-            std::string file_alias{};
-            TextureAnimation animation{};
-            std::function<void()> callback{};
-            unsigned int sheet{};
-        };
-
-        std::unordered_set<std::string> file_paths_{};
-        std::unordered_map<std::string, FileInfo_> file_info_{};
-        std::unordered_map<std::string, AnimationInfo_> animation_info_{};
-    };
 }
