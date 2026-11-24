@@ -183,9 +183,7 @@ namespace RPG {
                 std::chrono::duration_cast<std::chrono::milliseconds>(timer - last_frame).count();
 
             if (static_cast<double>(elapsed) * animation_info_[current_animation_].animation.frameSpeed >= 1000) {
-                if (currentFrame == 0) {
-                    animation_info_[current_animation_].callback();
-                }
+                animation_info_[current_animation_].callback();
                 ++currentFrame;
                 currentFrame %= animation_info_[current_animation_].animation.frameAmount;
                 if (currentFrame == 0) finished = true;

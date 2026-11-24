@@ -111,13 +111,15 @@ int main() {
     const auto sound = LoadSound("../assets/sounds/568170__merrick079__sword-sound-1_16bit.wav");
     sprite->addAnimation("Attack", "Attack", RPG::TextureAnimation(10, false, true), [&]() {
         SetGamepadVibration(0, 0.6, 0.6, 0.1);
-        PlaySound(sound);
+        if (!IsSoundPlaying(sound)) {
+            PlaySound(sound);
+        }
     });
     hear->addAnimation("Attack", "Attack", RPG::TextureAnimation(10, false, true));
     hand->addAnimation("Attack", "Attack", RPG::TextureAnimation(10, false, true));
 
     int fps = 60;
-    SetTargetFPS(fps);
+    // SetTargetFPS(fps);
 #define gamepad 0
     auto last = std::chrono::steady_clock::now();
     int FPS = 0, counter = 0;
