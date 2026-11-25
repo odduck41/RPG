@@ -3,6 +3,8 @@
 #include <raylib.h>
 #include <type_traits>
 
+#define FORCE_INLINE __attribute__((always_inline)) __inline__
+
 
 namespace VectorOperations {
     template<class T>
@@ -11,7 +13,7 @@ namespace VectorOperations {
                          std::is_same_v<Vector4, std::remove_cvref_t<T>>;
 
     template<VectorType Vector>
-    inline Vector& operator+=(Vector& a, const Vector& b) noexcept {
+    FORCE_INLINE Vector& operator+=(Vector& a, const Vector& b) noexcept {
         a = Vector{
             .x = a.x + b.x, .y = a.y + b.y
         };
@@ -21,12 +23,12 @@ namespace VectorOperations {
     }
 
     template<VectorType Vector>
-    inline Vector operator+(Vector a, const Vector& b) noexcept {
+    FORCE_INLINE Vector operator+(Vector a, const Vector& b) noexcept {
         return a += b;
     }
 
     template<VectorType Vector>
-    inline Vector& operator-=(Vector& a, const Vector& b) noexcept {
+    FORCE_INLINE Vector& operator-=(Vector& a, const Vector& b) noexcept {
         a = Vector{
             .x = a.x - b.x, .y = a.y - b.y
         };
@@ -36,12 +38,12 @@ namespace VectorOperations {
     }
 
     template<VectorType Vector>
-    inline Vector operator-(Vector a, const Vector& b) noexcept {
+    FORCE_INLINE Vector operator-(Vector a, const Vector& b) noexcept {
         return a -= b;
     }
 
     template<VectorType Vector, std::integral T>
-    inline Vector& operator*=(Vector& a, T b) {
+    FORCE_INLINE Vector& operator*=(Vector& a, T b) {
         a.x *= static_cast<float>(b);
         a.y *= static_cast<float>(b);
         if constexpr (requires {a.z;}) a.z *= static_cast<float>(b);
@@ -50,12 +52,12 @@ namespace VectorOperations {
     }
 
     template<VectorType Vector, std::integral T>
-    inline Vector operator*(Vector a, T b) {
+    FORCE_INLINE Vector operator*(Vector a, T b) {
         return a *= b;
     }
 
     template<class Vector, class T> requires VectorType<Vector> and std::is_integral_v<T>
-    inline Vector& operator/=(Vector& a, T b) {
+    FORCE_INLINE Vector& operator/=(Vector& a, T b) {
         a.x /= static_cast<float>(b);
         a.y /= static_cast<float>(b);
         if constexpr (requires {a.z;}) a.z /= static_cast<float>(b);
@@ -64,7 +66,7 @@ namespace VectorOperations {
     }
 
     template<class Vector, class T> requires VectorType<Vector> and std::is_integral_v<T>
-    inline Vector operator/(Vector a, T b) {
+    FORCE_INLINE Vector operator/(Vector a, T b) {
         return a /= b;
     }
 }
@@ -72,4 +74,18 @@ namespace VectorOperations {
 namespace RPG {
     using namespace VectorOperations;
 
+    class Frame {
+    public:
+        Frame() = default;
+        Frame(const Rectangle& source, const Rectangle& dest) :
+        sourceRect_(source), destRect_(dest ) {}
+
+
+    private:
+        Rectangle sourceRect_{};
+        Rectangle destRect_{};
+
+        Vector2 scaling_{.x = 1.f, .y = 1.f};
+        float rotation_{0.f};
+    };
 }
