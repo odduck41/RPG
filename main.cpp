@@ -4,5 +4,9 @@
 
 
 int main() {
+    Vector2 a;
+    Vector2 b;
+
+    a *= b;
 
 }

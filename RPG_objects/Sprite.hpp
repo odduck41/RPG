@@ -43,7 +43,7 @@ namespace VectorOperations {
     }
 
     template<VectorType Vector, std::integral T>
-    FORCE_INLINE Vector& operator*=(Vector& a, T b) {
+    FORCE_INLINE Vector& operator*=(Vector& a, const T& b) {
         a.x *= static_cast<float>(b);
         a.y *= static_cast<float>(b);
         if constexpr (requires {a.z;}) a.z *= static_cast<float>(b);
@@ -52,7 +52,7 @@ namespace VectorOperations {
     }
 
     template<VectorType Vector, std::integral T>
-    FORCE_INLINE Vector operator*(Vector a, T b) {
+    FORCE_INLINE Vector operator*(Vector a, const T& b) {
         return a *= b;
     }
 
@@ -80,12 +80,20 @@ namespace RPG {
         Frame(const Rectangle& source, const Rectangle& dest) :
         sourceRect_(source), destRect_(dest ) {}
 
+        void draw(const Texture& texture) const {
+            auto destRect = destRect_;
+            destRect.x *= scaling_.x;
+            destRect.y *= scaling_.y;
+
+            DrawTexturePro(texture, sourceRect_, destRect, origin_, rotation_, WHITE);
+        }
 
     private:
         Rectangle sourceRect_{};
         Rectangle destRect_{};
 
         Vector2 scaling_{.x = 1.f, .y = 1.f};
+        Vector2 origin_{.x = 0.f, .y = 0.f};
         float rotation_{0.f};
     };
 }
