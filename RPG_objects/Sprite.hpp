@@ -229,6 +229,13 @@ namespace RPG {
         FORCE_INLINE AnimSpeed() = default;
         FORCE_INLINE explicit AnimSpeed(const float& t) : duration_(t) {};
 
+        FORCE_INLINE void setDuration(const float& duration) {
+            duration_ = duration;
+        }
+        [[nodiscard]] FORCE_INLINE const float& getDuration() const {
+            return duration_;
+        }
+
         FORCE_INLINE bool shouldUpdate() override {
             const auto now = std::chrono::duration_cast<std::chrono::milliseconds>(
                     std::chrono::system_clock::now().time_since_epoch()
