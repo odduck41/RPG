@@ -78,7 +78,32 @@ namespace RPG {
     public:
         Frame() = default;
         Frame(const Rectangle& source, const Rectangle& dest) :
-        sourceRect_(source), destRect_(dest ) {}
+        sourceRect_(source), destRect_(dest) {}
+
+        void setSourceRectangle(const Rectangle& s_rct) {
+            sourceRect_ = s_rct;
+        }
+        [[nodiscard]] const Rectangle& getSourceRectangle() const { return sourceRect_; }
+
+        void setDestinationRectangle(const Rectangle& d_rct) {
+            destRect_ = d_rct;
+        }
+        [[nodiscard]] const Rectangle& getDestinationRectangle() const { return destRect_; }
+
+        void setScaling(const Vector2& scaling) {
+            scaling_ = scaling;
+        }
+        [[nodiscard]] const Vector2& getScaling() const { return scaling_; }
+
+        void setOrigin(const Vector2& origin) {
+            origin_ = origin;
+        }
+        [[nodiscard]] const Vector2& getOrigin() const { return origin_; }
+
+        void setRotation(const float& rotation) {
+            rotation_ = rotation;
+        }
+        [[nodiscard]] const float& getRotation() const { return rotation_; }
 
         void draw(const Texture& texture) const {
             auto destRect = destRect_;

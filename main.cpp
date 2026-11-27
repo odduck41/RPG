@@ -4,9 +4,6 @@
 
 
 int main() {
-    Vector2 a;
-    Vector2 b;
-
-    a *= b;
-
+    int* a = NULL;
+    std::cout << &a << std::endl;
 }
