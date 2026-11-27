@@ -1,0 +1,15 @@
+{
+  "PlayerIdle": {
+    "fileAlias": "PlayerIdle",
+    "frameAmount": 9,
+    "cycled": true,
+    "asksFinishing": false
+  },
+
+  "PlayerWalking": {
+    "fileAlias": "PlayerIdle",
+    "frameAmount": 9,
+    "cycled": true,
+    "asksFinishing": false
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "PlayerIdle": {
+    "paths": [
+      "../assets/Sunnyside_World_ARCHIVED_ASSETS/SUNNYSIDE_WORLD_CHARACTERS_PARTS_V0.3.1/IDLE/base_idle_strip9.png",
+      "../assets/Sunnyside_World_ARCHIVED_ASSETS/SUNNYSIDE_WORLD_CHARACTERS_PARTS_V0.3.1/IDLE/spikeyhair_idle_strip9.png",
+      "../assets/Sunnyside_World_ARCHIVED_ASSETS/SUNNYSIDE_WORLD_CHARACTERS_PARTS_V0.3.1/IDLE/tools_idle_strip9.png"
+    ],
+    "sheet_width": 96,
+    "sheet_height": 64
+  },
+  "PlayerWalk": {
+    "paths": [
+      "../assets/Sunnyside_World_ARCHIVED_ASSETS/SUNNYSIDE_WORLD_CHARACTERS_PARTS_V0.3.1/WALKING/base_walk_strip8.png",
+      "../assets/Sunnyside_World_ARCHIVED_ASSETS/SUNNYSIDE_WORLD_CHARACTERS_PARTS_V0.3.1/WALKING/spikeyhair_walk_strip8.png",
+      "../assets/Sunnyside_World_ARCHIVED_ASSETS/SUNNYSIDE_WORLD_CHARACTERS_PARTS_V0.3.1/WALKING/tools_walk_strip8.png"
+    ],
+    "sheet_width": 96,
+    "sheet_height": 64
+  },
+  "PlayerAttack": {
+    "paths": [
+      "../assets/Sunnyside_World_ARCHIVED_ASSETS/SUNNYSIDE_WORLD_CHARACTERS_PARTS_V0.3.1/ATTACK/base_attack_strip10.png",
+      "../assets/Sunnyside_World_ARCHIVED_ASSETS/SUNNYSIDE_WORLD_CHARACTERS_PARTS_V0.3.1/ATTACK/spikeyhair_attack_strip10.png",
+      "../assets/Sunnyside_World_ARCHIVED_ASSETS/SUNNYSIDE_WORLD_CHARACTERS_PARTS_V0.3.1/ATTACK/tools_attack_strip10.png"
+    ],
+    "sheet_width": 96,
+    "sheet_height": 64
+  },
+  "PlayerJump": {
+    "paths": [
+      "../assets/Sunnyside_World_ARCHIVED_ASSETS/SUNNYSIDE_WORLD_CHARACTERS_PARTS_V0.3.1/JUMP/base_jump_strip9.png",
+      "../assets/Sunnyside_World_ARCHIVED_ASSETS/SUNNYSIDE_WORLD_CHARACTERS_PARTS_V0.3.1/JUMP/spikeyhair_jump_strip9.png",
+      "../assets/Sunnyside_World_ARCHIVED_ASSETS/SUNNYSIDE_WORLD_CHARACTERS_PARTS_V0.3.1/JUMP/tools_jump_strip9.png"
+    ],
+    "sheet_width": 96,
+    "sheet_height": 64
+  }
+}

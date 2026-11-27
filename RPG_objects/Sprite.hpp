@@ -1,305 +1,268 @@
 #pragma once
-#include <algorithm>
-#include <cassert>
-#include <functional>
-#include <string>
 
-#include "raylib.h"
+#include <functional>
+#include <raylib.h>
+#include <type_traits>
+
+#define FORCE_INLINE __attribute__((always_inline)) __inline__
+
+
+namespace VectorOperations {
+    template<class T>
+    concept VectorType = std::is_same_v<Vector2, std::remove_cvref_t<T>> or
+                         std::is_same_v<Vector3, std::remove_cvref_t<T>> or
+                         std::is_same_v<Vector4, std::remove_cvref_t<T>>;
+
+    template<VectorType Vector>
+    FORCE_INLINE Vector& operator+=(Vector& a, const Vector& b) noexcept {
+        a = Vector{
+            .x = a.x + b.x, .y = a.y + b.y
+        };
+        if constexpr (requires {a.z;}) a.z += b.z;
+        if constexpr (requires {a.w;}) a.w += b.w;
+        return a;
+    }
+
+    template<VectorType Vector>
+    FORCE_INLINE Vector operator+(Vector a, const Vector& b) noexcept {
+        return a += b;
+    }
+
+    template<VectorType Vector>
+    FORCE_INLINE Vector& operator-=(Vector& a, const Vector& b) noexcept {
+        a = Vector{
+            .x = a.x - b.x, .y = a.y - b.y
+        };
+        if constexpr (requires {a.z;}) a.z -= b.z;
+        if constexpr (requires {a.w;}) a.w -= b.w;
+        return a;
+    }
+
+    template<VectorType Vector>
+    FORCE_INLINE Vector operator-(Vector a, const Vector& b) noexcept {
+        return a -= b;
+    }
+
+    template<VectorType Vector, std::integral T>
+    FORCE_INLINE Vector& operator*=(Vector& a, const T& b) {
+        a.x *= static_cast<float>(b);
+        a.y *= static_cast<float>(b);
+        if constexpr (requires {a.z;}) a.z *= static_cast<float>(b);
+        if constexpr (requires {a.w;}) a.w *= static_cast<float>(b);
+        return a;
+    }
+
+    template<VectorType Vector, std::integral T>
+    FORCE_INLINE Vector operator*(Vector a, const T& b) {
+        return a *= b;
+    }
+
+    template<class Vector, class T> requires VectorType<Vector> and std::is_integral_v<T>
+    FORCE_INLINE Vector& operator/=(Vector& a, T b) {
+        a.x /= static_cast<float>(b);
+        a.y /= static_cast<float>(b);
+        if constexpr (requires {a.z;}) a.z /= static_cast<float>(b);
+        if constexpr (requires {a.w;}) a.w /= static_cast<float>(b);
+        return a;
+    }
+
+    template<class Vector, class T> requires VectorType<Vector> and std::is_integral_v<T>
+    FORCE_INLINE Vector operator/(Vector a, T b) {
+        return a /= b;
+    }
+}
 
 namespace RPG {
+    using namespace VectorOperations;
 
-    enum AnimationTypes {
-        Idle,
-        Walking,
-        Running,
-        Attack,
-        Damaged,
-        Dying,
-        Eating,
-        Fishing,
-        Jump
+    class Frame {
+    public:
+        FORCE_INLINE Frame() = default;
+        FORCE_INLINE Frame(const Rectangle& source, const Rectangle& dest) :
+            sourceRect_(source), destRect_(dest) {}
+
+        FORCE_INLINE void setSourceRectangle(const Rectangle& s_rct) {
+            sourceRect_ = s_rct;
+        }
+        [[nodiscard]] FORCE_INLINE const Rectangle& getSourceRectangle() const { return sourceRect_; }
+
+        FORCE_INLINE void setDestinationRectangle(const Rectangle& d_rct) {
+            destRect_ = d_rct;
+        }
+        [[nodiscard]] FORCE_INLINE const Rectangle& getDestinationRectangle() const { return destRect_; }
+
+        FORCE_INLINE void setScaling(const Vector2& scaling) {
+            scaling_ = scaling;
+        }
+        [[nodiscard]] FORCE_INLINE const Vector2& getScaling() const { return scaling_; }
+
+        FORCE_INLINE void setOrigin(const Vector2& origin) {
+            origin_ = origin;
+        }
+        [[nodiscard]] FORCE_INLINE const Vector2& getOrigin() const { return origin_; }
+
+        FORCE_INLINE void setRotation(const float& rotation) {
+            rotation_ = rotation;
+        }
+        [[nodiscard]] FORCE_INLINE const float& getRotation() const { return rotation_; }
+
+        FORCE_INLINE void setStaticAnimation(const std::function<void(Frame&)>& func) {
+            animation_ = func;
+        }
+
+        FORCE_INLINE void startStaticAnimation() {
+            started = true;
+        }
+
+        FORCE_INLINE void stopStaticAnimation() {
+            started = false;
+        }
+
+        FORCE_INLINE void update() {
+            if (started && animation_ != nullptr) animation_(*this);
+        }
+
+        FORCE_INLINE void draw(const Texture& texture) const {
+            auto destRect = destRect_;
+            destRect.height *= scaling_.x;
+            destRect.width *= scaling_.y;
+
+            DrawTexturePro(texture, sourceRect_, destRect, origin_, rotation_, WHITE);
+        }
+
+    private:
+        Rectangle sourceRect_{};
+        Rectangle destRect_{};
+
+        Vector2 scaling_{.x = 1.f, .y = 1.f};
+        Vector2 origin_{.x = 0.f, .y = 0.f};
+        float rotation_{0.f};
+
+        std::function<void(Frame&)> animation_{};
+        bool started = false;
     };
-
-
 
     class Sprite {
     public:
-        Sprite() = default;
-        explicit Sprite(const Vector2& pos) : position_(pos) {}
-        void show() {visible_ = true;}
-        void hide() {visible_ = false;}
+        FORCE_INLINE Sprite() = default;
 
-        void setPosition(const Vector2& pos) {
-            position_ = pos;
+        FORCE_INLINE void setSourceRectangle(const Rectangle& s_rct) {
+            frame_.setSourceRectangle(s_rct);
         }
-        [[nodiscard]] const Vector2& getPosition() const {
-            return position_;
+        [[nodiscard]] FORCE_INLINE const Rectangle& getSourceRectangle() const {
+            return frame_.getSourceRectangle();
         }
 
-        void setScaling(const Vector2& scaling) {
-            scaling_ = scaling;
+        FORCE_INLINE void setDestinationRectangle(const Rectangle& d_rct) {
+            frame_.setDestinationRectangle(d_rct);
         }
-        [[nodiscard]] const Vector2& getScaling() const {
-            return scaling_;
-        }
-
-        void setRotation(const double& rotation) {
-            rotation_ = rotation;
-        }
-        [[nodiscard]] const double& getRotation() const {
-            return rotation_;
+        [[nodiscard]] FORCE_INLINE const Rectangle& getDestinationRectangle() const {
+            return frame_.getDestinationRectangle();
         }
 
+        FORCE_INLINE void setScaling(const Vector2& scaling) {
+            frame_.setScaling(scaling);
+        }
+        [[nodiscard]] FORCE_INLINE const Vector2& getScaling() const {
+            return frame_.getScaling();
+        }
 
-        virtual void update() = 0;
-        virtual void draw() = 0;
-        virtual ~Sprite() = default;
+        FORCE_INLINE void setOrigin(const Vector2& origin) {
+            frame_.setOrigin(origin);
+        }
+        [[nodiscard]] FORCE_INLINE const Vector2& getOrigin() const {
+            return frame_.getOrigin();
+        }
+
+        FORCE_INLINE void setRotation(const float& rotation) {
+            frame_.setRotation(rotation);
+        }
+        [[nodiscard]] FORCE_INLINE const float& getRotation() const {
+            return frame_.getRotation();
+        }
+
+        FORCE_INLINE virtual void update() = 0;
+        FORCE_INLINE virtual void draw() = 0;
+        FORCE_INLINE virtual ~Sprite() = default;
     protected:
-        bool visible_{true};
-        Vector2 position_{};
-        Vector2 scaling_{.x = 1., .y = 1.};
-        double rotation_{0};
-        Texture2D texture_{};
+        Frame frame_;
+    };
+
+    class StaticSprite final : public Sprite {
+    public:
+        FORCE_INLINE StaticSprite() = default;
+        FORCE_INLINE explicit StaticSprite(const std::string& filename) :
+            texture_(LoadTexture(std::move(filename).c_str())) {}
+
+        FORCE_INLINE void update() override {
+            frame_.update();
+        }
+
+        FORCE_INLINE void setTexture(const std::string& filename) {
+            if (IsTextureValid(texture_)) UnloadTexture(texture_);
+            texture_ = LoadTexture(std::move(filename).c_str());
+        }
+
+        FORCE_INLINE void draw() override {
+            frame_.draw(texture_);
+        }
+
+        FORCE_INLINE ~StaticSprite() override {
+            if (IsTextureValid(texture_)) UnloadTexture(texture_);
+        }
+    private:
+        Texture texture_{};
     };
 
 
-
-    class AnimatableSprite : public Sprite {
+    class AnimTime {
     public:
-        AnimatableSprite() = default;
+        FORCE_INLINE AnimTime() = default;
+        FORCE_INLINE virtual bool shouldUpdate() = 0;
+        FORCE_INLINE virtual ~AnimTime() = default;
+    protected:
+        std::chrono::milliseconds last_{};
+    };
 
-        AnimatableSprite(const std::string& filename, const Rectangle& rect, int states = 0, const AnimationTypes type = Idle, const bool cycled = false) {
-            type_ = type;
-            texture_ = LoadTexture(filename.c_str());
-            setTexture(rect);
-            if (states == 0) {
-                states = texture_.width / static_cast<int>(rect.width);
+    class AnimSpeed final : public AnimTime {
+    public:
+        FORCE_INLINE AnimSpeed() = default;
+        FORCE_INLINE explicit AnimSpeed(const float& t) : t_(t) {};
+
+        FORCE_INLINE bool shouldUpdate() override {
+            const auto now = std::chrono::duration_cast<std::chrono::milliseconds>(
+                    std::chrono::system_clock::now().time_since_epoch()
+            );
+
+            if (static_cast<float>((now - last_).count()) * t_ >= 1000.f) {
+                last_ = now;
+                return true;
             }
-            stateAmounts_[type] = states;
-            cycled_[type] = cycled;
-        }
-
-        AnimatableSprite(const std::string& filename, const Rectangle& rect, const AnimationTypes type = Idle, int states = 0, const bool cycled = false) {
-            type_ = type;
-            texture_ = LoadTexture(filename.c_str());
-            setTexture(rect);
-            if (states == 0) {
-                states = texture_.width / static_cast<int>(rect.width);
-            }
-            stateAmounts_[type] = states;
-            cycled_[type] = cycled;
-        }
-
-        AnimatableSprite(const std::string& filename, const int& states, const AnimationTypes type = Idle, const bool cycled = false) {
-            type_ = type;
-            texture_ = LoadTexture(filename.c_str());
-            setTexture(states);
-            cycled_[type] = cycled;
-        }
-
-
-
-
-        template<AnimationTypes type>
-        void setTexture(const Rectangle& rect, const bool cycled = false) {
-            source_rectangles_[type] = rect;
-            stateAmounts_[type] = texture_.width / static_cast<int>(rect.width);
-
-            cycled_[type] = cycled;
-        }
-
-        void setTexture(const Rectangle& rect, const bool cycled = false) {
-            source_rectangles_[type_] = rect;
-            stateAmounts_[type_] = texture_.width / static_cast<int>(rect.width);
-
-            cycled_[type_] = cycled;
-        }
-
-        template<AnimationTypes type>
-        void setTexture(const Rectangle& rect, const int& amount, const bool cycled = false) {
-            source_rectangles_[type] = rect;
-            stateAmounts_[type] = amount;
-
-            cycled_[type] = cycled;
-        }
-
-        void setTexture(const Rectangle& rect, const int& amount, const bool cycled = false) {
-            source_rectangles_[type_] = rect;
-            stateAmounts_[type_] = amount;
-
-            cycled_[type_] = cycled;
-        }
-
-
-        template<AnimationTypes type>
-        void setTexture(const int& amount, const bool cycled = false) {
-            stateAmounts_[type] = amount;
-
-            assert(texture_.width % amount == 0 && "MISMATCHING TEXTURE SIZE");
-
-            source_rectangles_[type] = {
-                .x = 0.f, .y = 0.f,
-                .width = static_cast<float>(texture_.width) / static_cast<float>(amount),
-                .height = static_cast<float>(texture_.height)
-            };
-
-            cycled_[type] = cycled;
-        }
-
-        void setTexture(const int& amount, const bool cycled = false) {
-            stateAmounts_[type_] = amount;
-
-            assert(texture_.width % amount == 0 && "MISMATCHING TEXTURE SIZE");
-
-            source_rectangles_[type_] = {
-                .x = 0.f, .y = 0.f,
-                .width = static_cast<float>(texture_.width) / static_cast<float>(amount),
-                .height = static_cast<float>(texture_.height)
-            };
-
-            cycled_[type_] = cycled;
-        }
-
-
-
-
-        template<AnimationTypes type>
-        void setFrameSpeed(const double& speed) {
-            // Frame changes every 1 / speed [secs]
-            frameSpeed_[type] = speed;
-        }
-
-        void setFrameSpeed(const double& speed) {
-            // Frame changes every 1 / speed [secs]
-            frameSpeed_[type_] = speed;
-        }
-
-        template<AnimationTypes type>
-        [[nodiscard]] double getFrameSpeed() const {
-            return frameSpeed_[type];
-        }
-
-        [[nodiscard]] double getFrameSpeed() const {
-            return frameSpeed_[type_];
-        }
-
-
-
-
-        void setAnimationType(const AnimationTypes& type) {
-            if (type_ == type) {
-                finished_ = false;
-                return;
-            }
-            type_ = type;
-            actualState_ = 0;
-            frameCounter_ = 0;
-            finished_ = false;
-        }
-
-        [[nodiscard]] const AnimationTypes& getAnimationType() const {
-            return type_;
-        }
-
-
-
-
-        template<AnimationTypes type>
-        void setStatesAmount(const int& amount) {
-            stateAmounts_[type] = amount;
-        }
-
-        void setStatesAmount(const int& amount) {
-            stateAmounts_[type_] = amount;
-        }
-
-        template<AnimationTypes type>
-        [[nodiscard]] int getStatesAmount() const {
-            return stateAmounts_[type];
-        }
-
-        [[nodiscard]] int getStatesAmount() const {
-            return stateAmounts_[type_];
-        }
-
-
-
-        template<AnimationTypes type>
-        void setBeforeAnimation(const std::function<void()>& func) {
-            functionsBefore_[type] = func;
-        }
-
-        void setBeforeAnimation(const std::function<void()>& func) {
-            functionsBefore_[type_] = func;
-        }
-
-        template<AnimationTypes type>
-        void setAfterAnimation(const std::function<void()>& func) {
-            functionsAfter_[type] = func;
-        }
-
-        void setAfterAnimation(const std::function<void()>& func) {
-            functionsAfter_[type_] = func;
-        }
-
-
-
-        [[nodiscard]] bool isFinished() const {
-            return finished_;
-        }
-
-        void update() override {
-            if (frameSpeed_[type_] == 0) frameSpeed_[type_] = 1.5 * stateAmounts_[type_];
-            if (frameCounter_ * frameSpeed_[type_] < 60) return;
-            frameCounter_ = 0;
-            if (finished_ && !cycled_[type_]) return;
-            ++actualState_;
-            actualState_ %= stateAmounts_[type_];
-            if (actualState_ == 0) {
-                finished_ = true;
-            } else {
-                finished_ = false;
-            }
-
-            source_rectangles_[type_].x =
-                static_cast<float>(actualState_) * source_rectangles_[type_].width;
-        }
-
-        void draw() override {
-            if (!visible_) return;
-            const Rectangle dest_rect = {
-                .x = position_.x, .y = position_.y,
-                .width = (source_rectangles_[type_].width * scaling_.x),
-                .height = (source_rectangles_[type_].height * scaling_.y)
-            };
-
-            // DrawRectangleRec(dest_rect, GREEN);
-            auto source_rect = source_rectangles_[type_];
-
-            source_rect.height *= scaling_.x / fabs(scaling_.x);
-            source_rect.width *= scaling_.y / fabs(scaling_.y);
-
-            if (functionsBefore_[type_] != nullptr) functionsBefore_[type_]();
-            DrawTexturePro(texture_, source_rect, dest_rect,
-                            Vector2{.x = 0, .y = 0}, static_cast<float>(rotation_), WHITE);
-            if (functionsAfter_[type_] != nullptr) functionsAfter_[type_]();
-
-            ++frameCounter_;
-        }
-
-        ~AnimatableSprite() override {
-            UnloadTexture(texture_);
+            return false;
         };
+
+        FORCE_INLINE ~AnimSpeed() override = default;
     private:
-        AnimationTypes type_{};
-        int stateAmounts_[9]{};
-        int actualState_{};
-        double frameSpeed_[9]{}; // frameCounter[Frames] * frameSpeed[1/s] >= 60[FPS]
-        int frameCounter_{0};
-        Rectangle source_rectangles_[9]{};
-        std::function<void()> functionsBefore_[9]{};
-        std::function<void()> functionsAfter_[9]{};
-        bool finished_{};
-        bool cycled_[9]{};
+        float t_{};
+    };
+
+    template<typename Updater = AnimSpeed> requires std::is_base_of_v<AnimTime, Updater>
+    class AnimatableSprite final : public Sprite {
+    public:
+        FORCE_INLINE AnimatableSprite() = default;
+
+        FORCE_INLINE void update() override {
+            if (updater_.shouldUpdate()) {
+
+            }
+        }
+
+        FORCE_INLINE void draw() override {
+
+        }
+
+        FORCE_INLINE ~AnimatableSprite() override = default;
+    private:
+        Updater updater_{};
     };
 }
