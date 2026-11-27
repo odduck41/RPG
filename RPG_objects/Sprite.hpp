@@ -167,4 +167,28 @@ namespace RPG {
     protected:
         Frame frame_;
     };
+
+    class StaticSprite final : public Sprite {
+    public:
+        StaticSprite() = default;
+        explicit StaticSprite(const std::string& filename) :
+            texture_(LoadTexture(std::move(filename).c_str())) {}
+
+        void update() override { /* DO NOTHING LOL*/ }
+
+        void setTexture(const std::string& filename) {
+            if (IsTextureValid(texture_)) UnloadTexture(texture_);
+            texture_ = LoadTexture(std::move(filename).c_str());
+        }
+
+        void draw() override {
+            frame_.draw(texture_);
+        }
+
+        ~StaticSprite() override {
+            if (IsTextureValid(texture_)) UnloadTexture(texture_);
+        }
+    private:
+        Texture texture_{};
+    };
 }
