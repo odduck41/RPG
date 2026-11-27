@@ -122,4 +122,49 @@ namespace RPG {
         float rotation_{0.f};
     };
 
+    class Sprite {
+    public:
+        Sprite() = default;
+
+        FORCE_INLINE void setSourceRectangle(const Rectangle& s_rct) {
+            frame_.setSourceRectangle(s_rct);
+        }
+        [[nodiscard]] FORCE_INLINE const Rectangle& getSourceRectangle() const {
+            return frame_.getSourceRectangle();
+        }
+
+        FORCE_INLINE void setDestinationRectangle(const Rectangle& d_rct) {
+            frame_.setDestinationRectangle(d_rct);
+        }
+        [[nodiscard]] FORCE_INLINE const Rectangle& getDestinationRectangle() const {
+            return frame_.getDestinationRectangle();
+        }
+
+        FORCE_INLINE void setScaling(const Vector2& scaling) {
+            frame_.setScaling(scaling);
+        }
+        [[nodiscard]] FORCE_INLINE const Vector2& getScaling() const {
+            return frame_.getScaling();
+        }
+
+        FORCE_INLINE void setOrigin(const Vector2& origin) {
+            frame_.setOrigin(origin);
+        }
+        [[nodiscard]] FORCE_INLINE const Vector2& getOrigin() const {
+            return frame_.getOrigin();
+        }
+
+        FORCE_INLINE void setRotation(const float& rotation) {
+            frame_.setRotation(rotation);
+        }
+        [[nodiscard]] FORCE_INLINE const float& getRotation() const {
+            return frame_.getRotation();
+        }
+
+        virtual void update() = 0;
+        virtual void draw() = 0;
+        virtual ~Sprite() = default;
+    protected:
+        Frame frame_;
+    };
 }
