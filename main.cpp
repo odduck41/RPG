@@ -11,16 +11,8 @@ int main() {
     frame.setSourceRectangle({0, 0, 12, 14});
     frame.setDestinationRectangle({300, 300, 12, 14});
     frame.setScaling({5, 5});
-    auto jump = [&]() {
-        static float t = 0;
-        auto destR = frame.getDestinationRectangle();
-        destR.y = 300 + 10 * cos(t);
-        frame.setDestinationRectangle(destR);
-        t += 0.001;
-    };
 
     while (!WindowShouldClose()) {
-        jump();
         BeginDrawing();
             ClearBackground(WHITE);
             frame.draw(texture);

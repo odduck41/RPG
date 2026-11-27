@@ -1,5 +1,6 @@
 #pragma once
 
+#include <functional>
 #include <raylib.h>
 #include <type_traits>
 
@@ -105,6 +106,22 @@ namespace RPG {
         }
         [[nodiscard]] FORCE_INLINE const float& getRotation() const { return rotation_; }
 
+        FORCE_INLINE void setStaticAnimation(const std::function<void(Frame&)>& func) {
+            animation_ = func;
+        }
+
+        void startStaticAnimation() {
+            started = true;
+        }
+
+        void stopStaticAnimation() {
+            started = false;
+        }
+
+        FORCE_INLINE void update() {
+            if (started && animation_ != nullptr) animation_(*this);
+        }
+
         FORCE_INLINE void draw(const Texture& texture) const {
             auto destRect = destRect_;
             destRect.height *= scaling_.x;
@@ -120,6 +137,9 @@ namespace RPG {
         Vector2 scaling_{.x = 1.f, .y = 1.f};
         Vector2 origin_{.x = 0.f, .y = 0.f};
         float rotation_{0.f};
+
+        std::function<void(Frame&)> animation_{};
+        bool started = false;
     };
 
     class Sprite {
@@ -174,7 +194,9 @@ namespace RPG {
         explicit StaticSprite(const std::string& filename) :
             texture_(LoadTexture(std::move(filename).c_str())) {}
 
-        void update() override { /* DO NOTHING LOL*/ }
+        void update() override {
+            frame_.update();
+        }
 
         void setTexture(const std::string& filename) {
             if (IsTextureValid(texture_)) UnloadTexture(texture_);
