@@ -218,7 +218,7 @@ namespace RPG {
     class AnimTime {
     public:
         FORCE_INLINE AnimTime() = default;
-        FORCE_INLINE virtual bool shouldUpdate() = 0;
+        FORCE_INLINE virtual bool shouldUpdate(const std::size_t&) = 0;
         FORCE_INLINE virtual ~AnimTime() = default;
     protected:
         std::chrono::milliseconds last_{};
@@ -236,7 +236,7 @@ namespace RPG {
             return duration_;
         }
 
-        FORCE_INLINE bool shouldUpdate() override {
+        FORCE_INLINE bool shouldUpdate(const std::size_t&) override {
             const auto now = std::chrono::duration_cast<std::chrono::milliseconds>(
                     std::chrono::system_clock::now().time_since_epoch()
             );
@@ -253,23 +253,53 @@ namespace RPG {
         float duration_{};
     };
 
+
+    struct TextureAnimation {
+        float width{};
+        float height{};
+        bool cycled{true};
+        bool asksFinishing{false};
+        std::size_t framesAmount{};
+    };
+
     template<typename Updater = AnimSpeed> requires std::is_base_of_v<AnimTime, Updater>
     class AnimatableSprite final : public Sprite {
     public:
         FORCE_INLINE AnimatableSprite() = default;
 
         FORCE_INLINE void update() override {
-            if (updater_.shouldUpdate()) {
+            if (updater_.shouldUpdate(animations_[currentAnimationAlias_].currentFrame)) {
+                ++animations_[currentAnimationAlias_].currentFrame
+                    %= animations_[currentAnimationAlias_].animation.framesAmount;
 
+                auto dest = frame_.getDestinationRectangle();
+                dest.y = dest.width * animations_[currentAnimationAlias_].currentFrame;
+                frame_.setDestinationRectangle(dest);
             }
+            frame_.update();
         }
 
         FORCE_INLINE void draw() override {
-
+            frame_.draw(files_[animations_[currentAnimationAlias_].fileAlias].texture);
         }
 
         FORCE_INLINE ~AnimatableSprite() override = default;
     private:
+        struct TextureFile {
+            Texture texture{};
+        };
+
+        struct TextureAnimationInfo {
+            std::string fileAlias{};
+            std::size_t index{};
+            std::size_t currentFrame{};
+            TextureAnimation animation{};
+        };
+
         Updater updater_{};
+
+        std::string currentAnimationAlias_{};
+        std::unordered_map<std::string, TextureFile> files_;
+        std::unordered_map<std::string, TextureAnimationInfo> animations_;
     };
 }
