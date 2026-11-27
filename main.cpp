@@ -1,4 +1,5 @@
 #include <iostream>
+#include <vector>
 
 #include "RPG_objects/Sprite.hpp"
 
@@ -11,6 +12,8 @@ int main() {
     frame.setSourceRectangle({0, 0, 12, 14});
     frame.setDestinationRectangle({300, 300, 12, 14});
     frame.setScaling({5, 5});
+    std::vector<RPG::Sprite*> sprites;
+    sprites.push_back(new RPG::AnimatableSprite());
 
     while (!WindowShouldClose()) {
         BeginDrawing();

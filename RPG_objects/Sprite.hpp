@@ -77,8 +77,8 @@ namespace RPG {
 
     class Frame {
     public:
-        Frame() = default;
-        Frame(const Rectangle& source, const Rectangle& dest) :
+        FORCE_INLINE Frame() = default;
+        FORCE_INLINE Frame(const Rectangle& source, const Rectangle& dest) :
             sourceRect_(source), destRect_(dest) {}
 
         FORCE_INLINE void setSourceRectangle(const Rectangle& s_rct) {
@@ -110,11 +110,11 @@ namespace RPG {
             animation_ = func;
         }
 
-        void startStaticAnimation() {
+        FORCE_INLINE void startStaticAnimation() {
             started = true;
         }
 
-        void stopStaticAnimation() {
+        FORCE_INLINE void stopStaticAnimation() {
             started = false;
         }
 
@@ -144,7 +144,7 @@ namespace RPG {
 
     class Sprite {
     public:
-        Sprite() = default;
+        FORCE_INLINE Sprite() = default;
 
         FORCE_INLINE void setSourceRectangle(const Rectangle& s_rct) {
             frame_.setSourceRectangle(s_rct);
@@ -181,36 +181,88 @@ namespace RPG {
             return frame_.getRotation();
         }
 
-        virtual void update() = 0;
-        virtual void draw() = 0;
-        virtual ~Sprite() = default;
+        FORCE_INLINE virtual void update() = 0;
+        FORCE_INLINE virtual void draw() = 0;
+        FORCE_INLINE virtual ~Sprite() = default;
     protected:
         Frame frame_;
     };
 
     class StaticSprite final : public Sprite {
     public:
-        StaticSprite() = default;
-        explicit StaticSprite(const std::string& filename) :
+        FORCE_INLINE StaticSprite() = default;
+        FORCE_INLINE explicit StaticSprite(const std::string& filename) :
             texture_(LoadTexture(std::move(filename).c_str())) {}
 
-        void update() override {
+        FORCE_INLINE void update() override {
             frame_.update();
         }
 
-        void setTexture(const std::string& filename) {
+        FORCE_INLINE void setTexture(const std::string& filename) {
             if (IsTextureValid(texture_)) UnloadTexture(texture_);
             texture_ = LoadTexture(std::move(filename).c_str());
         }
 
-        void draw() override {
+        FORCE_INLINE void draw() override {
             frame_.draw(texture_);
         }
 
-        ~StaticSprite() override {
+        FORCE_INLINE ~StaticSprite() override {
             if (IsTextureValid(texture_)) UnloadTexture(texture_);
         }
     private:
         Texture texture_{};
+    };
+
+
+    class AnimTime {
+    public:
+        FORCE_INLINE AnimTime() = default;
+        FORCE_INLINE virtual bool shouldUpdate() = 0;
+        FORCE_INLINE virtual ~AnimTime() = default;
+    protected:
+        std::chrono::milliseconds last_{};
+    };
+
+    class AnimSpeed final : public AnimTime {
+    public:
+        FORCE_INLINE AnimSpeed() = default;
+        FORCE_INLINE explicit AnimSpeed(const float& t) : t_(t) {};
+
+        FORCE_INLINE bool shouldUpdate() override {
+            const auto now = std::chrono::duration_cast<std::chrono::milliseconds>(
+                    std::chrono::system_clock::now().time_since_epoch()
+            );
+
+            if (static_cast<float>((now - last_).count()) * t_ >= 1000.f) {
+                last_ = now;
+                return true;
+            }
+            return false;
+        };
+
+        FORCE_INLINE ~AnimSpeed() override = default;
+    private:
+        float t_{};
+    };
+
+    template<typename Updater = AnimSpeed> requires std::is_base_of_v<AnimTime, Updater>
+    class AnimatableSprite final : public Sprite {
+    public:
+        FORCE_INLINE AnimatableSprite() = default;
+
+        FORCE_INLINE void update() override {
+            if (updater_.shouldUpdate()) {
+
+            }
+        }
+
+        FORCE_INLINE void draw() override {
+
+        }
+
+        FORCE_INLINE ~AnimatableSprite() override = default;
+    private:
+        Updater updater_{};
     };
 }
