@@ -107,8 +107,8 @@ namespace RPG {
 
         FORCE_INLINE void draw(const Texture& texture) const {
             auto destRect = destRect_;
-            destRect.x *= scaling_.x;
-            destRect.y *= scaling_.y;
+            destRect.height *= scaling_.x;
+            destRect.width *= scaling_.y;
 
             DrawTexturePro(texture, sourceRect_, destRect, origin_, rotation_, WHITE);
         }
