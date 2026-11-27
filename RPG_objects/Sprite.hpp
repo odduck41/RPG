@@ -277,7 +277,7 @@ namespace RPG {
             animations_[animationAlias].animation = animation;
             animations_[animationAlias].fileAlias = fileAlias;
             animations_[animationAlias].index = index;
-            updater_[animationAlias] = new Updater(upd);
+            animations_[animationAlias].updater = new Updater(upd);
         }
 
         FORCE_INLINE void setAnimation(const std::string& animationAlias) {
@@ -299,7 +299,7 @@ namespace RPG {
         }
 
         FORCE_INLINE void update() override {
-            if (updater_[currentAnimationAlias_]->shouldUpdate(animations_[currentAnimationAlias_].currentFrame)) {
+            if (animations_[currentAnimationAlias_].updater->shouldUpdate(animations_[currentAnimationAlias_].currentFrame)) {
                 ++animations_[currentAnimationAlias_].currentFrame
                     %= animations_[currentAnimationAlias_].animation.framesAmount;
 
@@ -325,12 +325,12 @@ namespace RPG {
             std::size_t index{};
             std::size_t currentFrame{};
             TextureAnimation animation{};
+            AnimTime* updater{};
         };
 
 
         std::string currentAnimationAlias_{};
         std::unordered_map<std::string, TextureFile> files_;
         std::unordered_map<std::string, TextureAnimationInfo> animations_;
-        std::unordered_map<std::string, AnimTime*> updater_{};
     };
 }

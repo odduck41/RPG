@@ -12,7 +12,7 @@ int main() {
     dynamic_cast<RPG::AnimatableSprite*>(sprites[0])->addFile("Soldier", "../assets/Tiny RPG Character Asset Pack 01 v2.0 -Free Soldier&Orc/Characters(100x100 split)/Soldier/Soldier/Soldier.png");
     dynamic_cast<RPG::AnimatableSprite*>(sprites[0])->addAnimation("Soldier", 0, "Idle", {
         100, 100, 6
-    }, RPG::AnimSpeed(24));
+    }, RPG::AnimSpeed(20));
     dynamic_cast<RPG::AnimatableSprite*>(sprites[0])->setAnimation("Idle");
     while (!WindowShouldClose()) {
         sprites[0]->update();
