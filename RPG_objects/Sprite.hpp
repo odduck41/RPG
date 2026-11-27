@@ -78,34 +78,34 @@ namespace RPG {
     public:
         Frame() = default;
         Frame(const Rectangle& source, const Rectangle& dest) :
-        sourceRect_(source), destRect_(dest) {}
+            sourceRect_(source), destRect_(dest) {}
 
-        void setSourceRectangle(const Rectangle& s_rct) {
+        FORCE_INLINE void setSourceRectangle(const Rectangle& s_rct) {
             sourceRect_ = s_rct;
         }
-        [[nodiscard]] const Rectangle& getSourceRectangle() const { return sourceRect_; }
+        [[nodiscard]] FORCE_INLINE const Rectangle& getSourceRectangle() const { return sourceRect_; }
 
-        void setDestinationRectangle(const Rectangle& d_rct) {
+        FORCE_INLINE void setDestinationRectangle(const Rectangle& d_rct) {
             destRect_ = d_rct;
         }
-        [[nodiscard]] const Rectangle& getDestinationRectangle() const { return destRect_; }
+        [[nodiscard]] FORCE_INLINE const Rectangle& getDestinationRectangle() const { return destRect_; }
 
-        void setScaling(const Vector2& scaling) {
+        FORCE_INLINE void setScaling(const Vector2& scaling) {
             scaling_ = scaling;
         }
-        [[nodiscard]] const Vector2& getScaling() const { return scaling_; }
+        [[nodiscard]] FORCE_INLINE const Vector2& getScaling() const { return scaling_; }
 
-        void setOrigin(const Vector2& origin) {
+        FORCE_INLINE void setOrigin(const Vector2& origin) {
             origin_ = origin;
         }
-        [[nodiscard]] const Vector2& getOrigin() const { return origin_; }
+        [[nodiscard]] FORCE_INLINE const Vector2& getOrigin() const { return origin_; }
 
-        void setRotation(const float& rotation) {
+        FORCE_INLINE void setRotation(const float& rotation) {
             rotation_ = rotation;
         }
-        [[nodiscard]] const float& getRotation() const { return rotation_; }
+        [[nodiscard]] FORCE_INLINE const float& getRotation() const { return rotation_; }
 
-        void draw(const Texture& texture) const {
+        FORCE_INLINE void draw(const Texture& texture) const {
             auto destRect = destRect_;
             destRect.x *= scaling_.x;
             destRect.y *= scaling_.y;
@@ -121,4 +121,5 @@ namespace RPG {
         Vector2 origin_{.x = 0.f, .y = 0.f};
         float rotation_{0.f};
     };
+
 }
