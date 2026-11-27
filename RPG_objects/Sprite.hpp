@@ -257,24 +257,55 @@ namespace RPG {
     struct TextureAnimation {
         float width{};
         float height{};
+        std::size_t framesAmount{};
+
         bool cycled{true};
         bool asksFinishing{false};
-        std::size_t framesAmount{};
     };
 
-    template<typename Updater = AnimSpeed> requires std::is_base_of_v<AnimTime, Updater>
     class AnimatableSprite final : public Sprite {
     public:
         FORCE_INLINE AnimatableSprite() = default;
 
+        FORCE_INLINE void addFile(const std::string& fileAlias, const std::string& file) {
+            files_[fileAlias].texture = LoadTexture(file.c_str());
+        }
+
+        template<typename Updater = AnimSpeed> requires std::is_base_of_v<AnimTime, Updater>
+        FORCE_INLINE void addAnimation(const std::string& fileAlias, const std::size_t& index,
+            const std::string& animationAlias, const TextureAnimation& animation, const Updater& upd) {
+            animations_[animationAlias].animation = animation;
+            animations_[animationAlias].fileAlias = fileAlias;
+            animations_[animationAlias].index = index;
+            updater_[animationAlias] = new Updater(upd);
+        }
+
+        FORCE_INLINE void setAnimation(const std::string& animationAlias) {
+            currentAnimationAlias_ = animationAlias;
+            frame_.setSourceRectangle({
+                0,
+                animations_[currentAnimationAlias_].animation.height *
+                                animations_[currentAnimationAlias_].index,
+                animations_[currentAnimationAlias_].animation.width,
+                animations_[currentAnimationAlias_].animation.height
+            });
+
+            frame_.setDestinationRectangle({
+                0,
+                0,
+                animations_[currentAnimationAlias_].animation.width,
+                animations_[currentAnimationAlias_].animation.height
+            });
+        }
+
         FORCE_INLINE void update() override {
-            if (updater_.shouldUpdate(animations_[currentAnimationAlias_].currentFrame)) {
+            if (updater_[currentAnimationAlias_]->shouldUpdate(animations_[currentAnimationAlias_].currentFrame)) {
                 ++animations_[currentAnimationAlias_].currentFrame
                     %= animations_[currentAnimationAlias_].animation.framesAmount;
 
-                auto dest = frame_.getDestinationRectangle();
-                dest.y = dest.width * animations_[currentAnimationAlias_].currentFrame;
-                frame_.setDestinationRectangle(dest);
+                auto source = frame_.getSourceRectangle();
+                source.x = source.width * animations_[currentAnimationAlias_].currentFrame;
+                frame_.setSourceRectangle(source);
             }
             frame_.update();
         }
@@ -296,10 +327,10 @@ namespace RPG {
             TextureAnimation animation{};
         };
 
-        Updater updater_{};
 
         std::string currentAnimationAlias_{};
         std::unordered_map<std::string, TextureFile> files_;
         std::unordered_map<std::string, TextureAnimationInfo> animations_;
+        std::unordered_map<std::string, AnimTime*> updater_{};
     };
 }
