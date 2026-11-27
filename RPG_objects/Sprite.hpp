@@ -227,14 +227,14 @@ namespace RPG {
     class AnimSpeed final : public AnimTime {
     public:
         FORCE_INLINE AnimSpeed() = default;
-        FORCE_INLINE explicit AnimSpeed(const float& t) : t_(t) {};
+        FORCE_INLINE explicit AnimSpeed(const float& t) : duration_(t) {};
 
         FORCE_INLINE bool shouldUpdate() override {
             const auto now = std::chrono::duration_cast<std::chrono::milliseconds>(
                     std::chrono::system_clock::now().time_since_epoch()
             );
 
-            if (static_cast<float>((now - last_).count()) * t_ >= 1000.f) {
+            if (static_cast<float>((now - last_).count()) * duration_ >= 1000.f) {
                 last_ = now;
                 return true;
             }
@@ -243,7 +243,7 @@ namespace RPG {
 
         FORCE_INLINE ~AnimSpeed() override = default;
     private:
-        float t_{};
+        float duration_{};
     };
 
     template<typename Updater = AnimSpeed> requires std::is_base_of_v<AnimTime, Updater>
